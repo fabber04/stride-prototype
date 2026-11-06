@@ -1,72 +1,61 @@
 import { Icon, PlayFill } from '../icons.jsx';
+import Cover from '../components/Cover.jsx';
 import { useStore } from '../store.jsx';
 import { lessons } from '../data.js';
 
 export default function Learn() {
-  const { state, set } = useStore();
-
-  const toggle = (key, id) =>
-    set((prev) => ({ [key]: { ...prev[key], [id]: !prev[key][id] } }));
+  const { state } = useStore();
+  const savedCount = lessons.filter((l) => state.saved[l.id]).length;
 
   return (
     <main className="page">
-      <header className="stack-12">
-        <h1 className="h1">Lessons from mentors</h1>
-        <div className="banner">
-          <Icon name="wifi" size={20} color="var(--blue)" />
-          <span>Data saver is on. Download lessons on club Wi-Fi and watch them anywhere.</span>
-        </div>
+      <header className="topbar">
+        <h1 className="h1">Learn</h1>
+        <span className="pill-success">
+          <Icon name="download" size={16} strokeWidth={2.2} />
+          {savedCount} saved offline
+        </span>
       </header>
 
+      <section className="hero" aria-label="Continue learning">
+        <span className="hero-eyebrow">Continue learning</span>
+        <div className="hero-row">
+          <div className="stack-12 grow">
+            <span className="hero-title">Three opening traps to know</span>
+            <div className="row-center">
+              <div className="progress grow" role="progressbar" aria-label="Lesson progress" aria-valuemin={0} aria-valuemax={8} aria-valuenow={3}>
+                <span style={{ width: '38%' }} />
+              </div>
+              <strong className="hero-small num">3/8 min</strong>
+            </div>
+          </div>
+          <a className="hero-play" href="#/lesson/chess" aria-label="Continue Three opening traps to know">
+            <PlayFill size={20} />
+          </a>
+        </div>
+      </section>
+
+      <h2 className="section-title">From your mentors and coaches</h2>
       <div className="stack-12">
-        {lessons.map((lesson) => {
-          const saved = !!state.saved[lesson.id];
-          const playing = !!state.playing[lesson.id];
-          return (
-            <article className="card" key={lesson.id}>
-              <div className="stack-4">
-                <span className="label">{lesson.meta}</span>
-                <h2 className="card-title">{lesson.title}</h2>
-              </div>
-              <div className="task">
-                <strong>Offline task.</strong> {lesson.task}
-              </div>
-              <p className="small muted">{lesson.reward}</p>
-              {saved ? (
-                <div className="stack-8">
-                  <div className="row-8">
-                    <button type="button" className="btn btn-primary grow" onClick={() => toggle('playing', lesson.id)}>
-                      <PlayFill />
-                      Play without data
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-ghost"
-                      aria-label={`Remove download of ${lesson.title}`}
-                      onClick={() => toggle('saved', lesson.id)}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  {playing && (
-                    <div className="status" role="status">
-                      Playing from this phone. No data used.
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <button type="button" className="btn btn-primary" onClick={() => toggle('saved', lesson.id)}>
-                  Download {lesson.size}
-                </button>
-              )}
-            </article>
-          );
-        })}
+        {lessons.map((lesson) => (
+          <a className="card list-row" key={lesson.id} href={`#/lesson/${lesson.id}`}>
+            <Cover type={lesson.type} size="sm" label />
+            <div className="stack-4 grow">
+              <span className="row-title">{lesson.title}</span>
+              <span className="row-meta">
+                {lesson.minutes} min · {lesson.by} · {lesson.size}
+              </span>
+            </div>
+            <span className="play-dot" aria-hidden="true">
+              <PlayFill size={14} />
+            </span>
+          </a>
+        ))}
       </div>
 
-      <div className="note">
-        <Icon name="refresh" size={20} color="var(--blue)" />
-        <span>Progress is saved on this phone and syncs the next time you have a connection.</span>
+      <div className="info">
+        <Icon name="wifiOff" size={22} />
+        <p>Saved lessons play with no data. Each one ends with a task you do offline, and your mentor confirms it.</p>
       </div>
     </main>
   );

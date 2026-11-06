@@ -24,19 +24,23 @@ The `dist` folder is a plain static site. Drop it on Netlify, Vercel, GitHub Pag
 
 On a phone, open the link and choose "Add to home screen". The app shell and fonts are cached, so it opens offline once it has loaded one time on a connection.
 
-## The five screens
+## The screens
+
+The first five are tabs in the bottom bar. Club and Lesson open from a list.
 
 | Route | File | What it shows |
 | --- | --- | --- |
-| `#/today` | `src/screens/Today.jsx` | Weekly streak, check in to a session, mentor challenge |
-| `#/clubs` | `src/screens/Clubs.jsx` | Verified clubs, filters, ask a guardian to approve |
-| `#/learn` | `src/screens/Learn.jsx` | Lessons that download for offline play, with offline tasks |
+| `#/today` | `src/screens/Today.jsx` | Weekly streak, categories, your clubs this week, mentor challenge |
+| `#/clubs` | `src/screens/Clubs.jsx` | Search and filter verified clubs |
+| `#/learn` | `src/screens/Learn.jsx` | Continue learning, lessons from mentors and coaches |
 | `#/mentor` | `src/screens/Mentor.jsx` | Mentor safety checks, guardian-visible messages, report a concern |
-| `#/guardian` | `src/screens/Guardian.jsx` | Approve requests, confirmed sessions, WhatsApp summary |
+| `#/guardian` | `src/screens/Guardian.jsx` | Confirmed sessions, approve requests, WhatsApp summary |
+| `#/club/<id>` | `src/screens/ClubDetail.jsx` | Club details, upcoming sessions, ask a guardian to approve |
+| `#/lesson/<id>` | `src/screens/Lesson.jsx` | Lesson video, offline task, badge, "I did the task" |
 
 ## Where things live
 
-- `src/styles.css` holds the design tokens (colors, fonts) at the top, then the styles for each part of the app. The tokens match the Family of Greatness app: Inter, slate neutrals, a `#2563eb` blue accent, a navy wordmark, thin borders and pill-shaped controls.
+- `src/styles.css` holds the design tokens (colors, fonts) at the top, then the styles for each part of the app: Outfit, a white ground, thin-bordered cards, a `#4c49e6` indigo accent and pill-shaped chips.
 - `src/data.js` holds the sample clubs, lessons and children. Swap this for real data.
 - `src/store.jsx` is the shared state, so a club request made in Clubs shows up in the Guardian view.
 - `src/icons.jsx` holds the inline icons.

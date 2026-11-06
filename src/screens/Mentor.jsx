@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Icon } from '../icons.jsx';
 import Status from '../components/Status.jsx';
+import Cover from '../components/Cover.jsx';
 import { reportReasons } from '../data.js';
 
 const checks = ['ID verified', 'Safeguarding training complete', 'Approved by the Junior Coders club'];
@@ -25,17 +26,19 @@ export default function Mentor() {
 
   return (
     <main className="page">
+      <h1 className="h1">Your mentor</h1>
+
       <header className="profile">
         <span className="avatar avatar-lg" aria-hidden="true">TN</span>
         <div className="stack-2">
-          <h1 className="h1 h1-profile">Tendai N.</h1>
-          <span className="muted small">Computer science student</span>
-          <span className="muted small">Mentor at Junior Coders</span>
+          <span className="kicker">Mentor at Junior Coders</span>
+          <h2 className="h1 h1-profile">Tendai N.</h2>
+          <span className="row-meta">Computer science student</span>
         </div>
       </header>
 
       <section className="card" aria-label="Safety checks">
-        <h2 className="card-title card-title-sm">Checked before joining Stride</h2>
+        <h2 className="section-title">Checked before joining Stride</h2>
         {checks.map((item) => (
           <div className="check-row" key={item}>
             <Icon name="checkCircle" strokeWidth={2.4} color="var(--success)" />
@@ -45,7 +48,7 @@ export default function Mentor() {
       </section>
 
       <section className="callout" aria-label="How messages work">
-        <Icon name="eye" color="var(--blue)" />
+        <Icon name="eye" color="var(--primary)" />
         <p>Messages stay inside Stride. Your guardian can read every one.</p>
       </section>
 
@@ -85,11 +88,15 @@ export default function Mentor() {
         </div>
       )}
 
-      <section className="card" aria-label="Challenges">
-        <span className="label">Current challenge</span>
-        <span className="card-title card-title-sm">Build a quiz in 20 lines of Python</span>
-        <a className="text-link" href="#/learn">Open the lesson</a>
-      </section>
+      <h2 className="section-title">Current challenge</h2>
+      <a className="card list-row" href="#/lesson/python">
+        <Cover type="Tech" size="sm" />
+        <div className="stack-2 grow">
+          <span className="row-title">Build a quiz in 20 lines of Python</span>
+          <span className="row-meta">6 min lesson · Earns the Builder badge</span>
+        </div>
+        <Icon name="arrowRight" size={20} />
+      </a>
 
       <button type="button" className="btn btn-danger-outline" onClick={openReport}>
         <Icon name="flag" size={18} />

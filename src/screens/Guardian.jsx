@@ -1,103 +1,125 @@
 import { Icon } from '../icons.jsx';
+import Cover from '../components/Cover.jsx';
+import Status from '../components/Status.jsx';
 import { useStore } from '../store.jsx';
-import { children, guardianData } from '../data.js';
+import { children, clubs, guardianData } from '../data.js';
 
 export default function Guardian() {
   const { state, set } = useStore();
+  const kid = children.find((c) => c.id === state.child);
   const data = guardianData[state.child];
-  // The approval card follows the request Tino makes on the Clubs screen.
-  const showApproval = state.child === 'tino' && !!state.requested.coders;
-  const pending = state.decision === 'pending';
+  // Requests come from Tino's taps on a club's "Ask my guardian to approve".
+  const requests = state.child === 'tino' ? clubs.filter((club) => state.requested[club.id]) : [];
+  const decide = (id, decision) => set((prev) => ({ decisions: { ...prev.decisions, [id]: decision } }));
 
   return (
     <main className="page">
-      <header className="topbar">
-        <h1 className="h1 h1-guardian">Guardian view</h1>
-        <a className="pill-link" href="#/today">Kid view</a>
+      <header className="stack-2">
+        <span className="eyebrow">Guardian view</span>
+        <h1 className="h1">Your children this week</h1>
       </header>
 
       <div className="chips" role="group" aria-label="Choose a child">
-        {children.map((kid) => (
+        {children.map((c) => (
           <button
-            key={kid.id}
+            key={c.id}
             type="button"
-            className={kid.id === state.child ? 'chip chip-wide is-on' : 'chip chip-wide'}
-            aria-pressed={kid.id === state.child}
-            onClick={() => set({ child: kid.id })}
+            className={c.id === state.child ? 'chip chip-dark is-on' : 'chip chip-dark'}
+            aria-pressed={c.id === state.child}
+            onClick={() => set({ child: c.id })}
           >
-            {kid.label}
+            {c.label}
           </button>
         ))}
       </div>
 
-      {showApproval && (
-        <section className="card card-accent" aria-label="Needs your approval">
-          <span className="label">Needs your approval</span>
-          <h2 className="card-title">Tino asked to join Junior Coders</h2>
-          <p className="body-muted">Wednesdays, 4:30 pm. Mentor Tendai N. has passed ID and safeguarding checks.</p>
-          {pending ? (
-            <div className="row-8">
-              <button type="button" className="btn btn-primary grow" onClick={() => set({ decision: 'approved' })}>
-                Approve
-              </button>
-              <button type="button" className="btn btn-outline grow" onClick={() => set({ decision: 'declined' })}>
-                Decline
-              </button>
-            </div>
-          ) : (
-            <div className="stack-2">
-              <div className="status" role="status">
-                {state.decision === 'approved'
-                  ? 'Approved. Tino can join Junior Coders from this Wednesday.'
-                  : 'Declined. Tino is told that you said no.'}
-              </div>
-              <button type="button" className="link-btn" onClick={() => set({ decision: 'pending' })}>
-                Change my answer
-              </button>
-            </div>
-          )}
-        </section>
+      <section className="hero" aria-label="Confirmed sessions">
+        <span className="hero-eyebrow">Confirmed by coaches</span>
+        <span className="hero-stat">
+          <strong className="num">
+            {data.confirmed} of {data.goal}
+          </strong>{' '}
+          sessions
+        </span>
+        <div className="progress" role="progressbar" aria-label="Confirmed sessions" aria-valuemin={0} aria-valuemax={data.goal} aria-valuenow={data.confirmed}>
+          <span style={{ width: `${(data.confirmed / data.goal) * 100}%` }} />
+        </div>
+        <span className="hero-small">{data.message}</span>
+      </section>
+
+      {requests.length > 0 && (
+        <>
+          <h2 className="section-title">Waiting for you</h2>
+          {requests.map((club) => {
+            const decision = state.decisions[club.id];
+            return (
+              <section className="card" key={club.id} aria-label={`${kid.label} wants to join ${club.name}`}>
+                <div className="row-item">
+                  <Cover type={club.type} size="sm" label />
+                  <div className="stack-2 grow">
+                    <span className="row-title">
+                      {kid.label} wants to join {club.name}
+                    </span>
+                    <span className="row-meta">
+                      {club.short} · {club.note.replace(/\.$/, '')}
+                    </span>
+                  </div>
+                </div>
+                {!decision ? (
+                  <div className="row-12">
+                    <button type="button" className="btn btn-ghost grow" onClick={() => decide(club.id, 'declined')}>
+                      Not now
+                    </button>
+                    <button type="button" className="btn btn-primary grow" onClick={() => decide(club.id, 'approved')}>
+                      Approve
+                    </button>
+                  </div>
+                ) : (
+                  <div className="stack-2">
+                    <Status>
+                      {decision === 'approved'
+                        ? `Approved. ${kid.label} can join ${club.name} from ${club.when.split(',')[0].replace(/s$/, '')}.`
+                        : `Not now. ${kid.label} is told you said no for now.`}
+                    </Status>
+                    <button type="button" className="link-btn" onClick={() => decide(club.id, undefined)}>
+                      Change my answer
+                    </button>
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </>
       )}
 
-      <section className="card" aria-label="This week">
-        <div className="week-head">
-          <h2 className="card-title card-title-sm">This week</h2>
-          <span className="week-count num">{data.confirmed}</span>
-        </div>
+      <h2 className="section-title">Confirmed sessions</h2>
+      <div className="stack-12">
         {data.sessions.map((session) => (
-          <div className="session-row" key={session.name}>
-            <Icon name="checkCircle" strokeWidth={2.4} color="var(--success)" style={{ flex: 'none', marginTop: 1 }} />
+          <div className="session" key={session.name}>
+            <span className="check-dot" aria-hidden="true">
+              <Icon name="check" size={18} strokeWidth={2.4} />
+            </span>
             <div className="stack-2">
-              <span className="session-name">{session.name}</span>
-              <span className="muted tiny">{session.detail}</span>
+              <span className="row-title">{session.name}</span>
+              <span className="row-meta">{session.detail}</span>
             </div>
           </div>
         ))}
-      </section>
+      </div>
 
-      <section className="callout" aria-label="Messages">
-        <Icon name="message" color="var(--blue)" />
-        <p>{data.message} You can read every message in Stride.</p>
-      </section>
-
-      <section className="card card-row" aria-label="WhatsApp summary">
-        <div className="stack-4">
-          <span id="digest-label" className="switch-title">Sunday summary on WhatsApp</span>
-          <span className="muted tiny">
-            Sessions attended, new badges and mentor messages. No app or data needed to read it.
-          </span>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={state.digest}
-          aria-labelledby="digest-label"
-          className={state.digest ? 'switch is-on' : 'switch'}
-          onClick={() => set({ digest: !state.digest })}
-        >
-          <span className="switch-knob" />
+      {!state.summarySent ? (
+        <button type="button" className="btn btn-ghost btn-push" onClick={() => set({ summarySent: true })}>
+          <Icon name="send" size={20} />
+          Send weekly summary on WhatsApp
         </button>
-      </section>
+      ) : (
+        <div className="stack-2 btn-push">
+          <Status>Weekly summary sent on WhatsApp.</Status>
+          <button type="button" className="link-btn" onClick={() => set({ summarySent: false })}>
+            Send again
+          </button>
+        </div>
+      )}
     </main>
   );
 }

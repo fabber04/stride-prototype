@@ -5,14 +5,15 @@ import { createContext, useCallback, useContext, useState } from 'react';
 const StoreContext = createContext(null);
 
 const initialState = {
-  checkedIn: false,
   clubFilter: 'All',
+  clubSearch: '',
   requested: { coders: true },
-  saved: { python: true },
+  decisions: {},
+  saved: { python: true, chess: true, voice: true },
   playing: {},
+  taskDone: {},
   child: 'tino',
-  decision: 'pending',
-  digest: true
+  summarySent: false
 };
 
 export function StoreProvider({ children }) {
