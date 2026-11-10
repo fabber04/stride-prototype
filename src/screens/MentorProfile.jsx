@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import { Icon } from '../icons.jsx';
 import NavBar from '../components/NavBar.jsx';
-import { mentor as matchedMentor } from '../data.js';
+import { useBackend } from '../api/index.jsx';
+import { allowed } from '../api/selectors.js';
 
-export default function MentorProfile({ person = matchedMentor }) {
+const backFor = { teen: '#/mentor', guardian: '#/guardian', mentor: '#/dashboard' };
+
+export default function MentorProfile({ person }) {
+  const { user } = useBackend();
   const [failed, setFailed] = useState(false);
   const mentor = person;
+  const canMessage = user.role === 'teen' && allowed(user, 'messages');
 
   return (
     <main className="page">
-      <NavBar title="Mentor profile" back="#/mentor" />
+      <NavBar title={user.role === 'mentor' && user.mentorId === mentor.id ? 'Your public profile' : 'Mentor profile'} back={backFor[user.role]} />
 
       <section className="mentor-hero" aria-label={mentor.name}>
-        {!failed ? (
+        {mentor.photo && !failed ? (
           <img className="mentor-photo" src={mentor.photo} alt={mentor.name} onError={() => setFailed(true)} />
         ) : (
           <span className="mentor-photo mentor-photo-empty" aria-hidden="true">
@@ -88,13 +93,8 @@ export default function MentorProfile({ person = matchedMentor }) {
         <p>Every message with {mentor.first} stays inside Stride, and guardians can read all of them.</p>
       </div>
 
-      {mentor.id === matchedMentor.id ? (
-        <a className="btn btn-primary" href="#/mentor">
-          <Icon name="message" size={18} strokeWidth={1.8} />
-          Message {mentor.first}
-        </a>
-      ) : (
-        <a className="btn btn-primary" href={`#/ask/${mentor.id}`}>
+      {canMessage && (
+        <a className="btn btn-primary" href={`#/chat/${mentor.id}`}>
           <Icon name="message" size={18} strokeWidth={1.8} />
           Message {mentor.first}
         </a>

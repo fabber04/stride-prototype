@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import FieldError from '../../components/FieldError.jsx';
 import { Icon } from '../../icons.jsx';
 import StepHeader from '../../components/StepHeader.jsx';
 import Status from '../../components/Status.jsx';
@@ -8,7 +9,7 @@ import { MAX_AGE, MIN_AGE, POLICY_VERSION, ageBand, ageFrom, consentItems, relat
 const TOTAL = 4;
 
 export function GuardianAccount({ draft, update, go, back, invite }) {
-  const ready = draft.guardianName.trim() && draft.guardianContact.trim() && draft.relation;
+  const ready = draft.guardianName.trim() && draft.guardianContact.trim() && draft.relation && draft.password.length >= 6;
 
   return (
     <main className="page onboard">
@@ -40,6 +41,18 @@ export function GuardianAccount({ draft, update, go, back, invite }) {
           value={draft.guardianContact}
           onChange={(e) => update({ guardianContact: e.target.value })}
         />
+      </label>
+
+      <label className="stack-8">
+        <span className="field-label">Create a password</span>
+        <input
+          className="input"
+          type="password"
+          autoComplete="new-password"
+          value={draft.password}
+          onChange={(e) => update({ password: e.target.value })}
+        />
+        <span className="small muted">6 or more characters. You'll sign in with your phone number or email and this.</span>
       </label>
 
       <div className="stack-8" role="group" aria-label="Your relationship to the teen">
@@ -134,14 +147,14 @@ export function VerifyGuardian({ draft, update, go, back }) {
   );
 }
 
-export function ConsentStep({ draft, update, back, onAgree }) {
+export function ConsentStep({ draft, update, back, onAgree, step = 3, total = TOTAL }) {
   const name = draft.teenName.trim() || 'Your teen';
   const setItem = (id, on) =>
     update({ consent: { ...draft.consent, [id]: on, ...(id === 'mentor' && !on ? { messages: false } : {}) } });
 
   return (
     <main className="page onboard">
-      <StepHeader onBack={back} step={3} total={TOTAL} kicker="Your permission" title={`What can ${name} use?`}>
+      <StepHeader onBack={back} step={step} total={total} kicker="Your permission" title={`What can ${name} use?`}>
         Each one is separate. You can change any of them later in Guardian, Controls.
       </StepHeader>
 
@@ -173,19 +186,22 @@ export function ConsentStep({ draft, update, back, onAgree }) {
   );
 }
 
-export function ChildProfile({ draft, update, back, onActivate }) {
+export const suggestLogin = (name) => name.trim().toLowerCase().replace(/[^a-z0-9_.]/g, '').slice(0, 20);
+
+export function ChildProfile({ draft, update, back, onActivate, step = 4, total = TOTAL, error, busy }) {
   const band = ageBand(ageFrom(draft.dob));
-  const ready = draft.teenName.trim() && band === 'teen';
+  const ready = draft.teenName.trim() && band === 'teen' && /^[a-z0-9_.]{3,20}$/.test(draft.login) && /^\d{4}$/.test(draft.pin);
+  const setName = (teenName) => update(draft.loginEdited ? { teenName } : { teenName, login: suggestLogin(teenName) });
 
   return (
     <main className="page onboard">
-      <StepHeader onBack={back} step={4} total={TOTAL} kicker="Teen profile" title="About your teen">
+      <StepHeader onBack={back} step={step} total={total} kicker="Teen profile" title="About your teen">
         Only you and their club leaders see their full name.
       </StepHeader>
 
       <label className="stack-8">
         <span className="field-label">First name</span>
-        <input className="input" value={draft.teenName} onChange={(e) => update({ teenName: e.target.value })} />
+        <input className="input" autoComplete="off" value={draft.teenName} onChange={(e) => setName(e.target.value)} />
       </label>
 
       <label className="stack-8">
@@ -204,6 +220,34 @@ export function ChildProfile({ draft, update, back, onActivate }) {
         )}
       </label>
 
+      <label className="stack-8">
+        <span className="field-label">Username</span>
+        <input
+          className="input"
+          autoCapitalize="none"
+          autoComplete="off"
+          spellCheck="false"
+          value={draft.login}
+          onChange={(e) => update({ login: e.target.value.toLowerCase().replace(/\s/g, ''), loginEdited: true })}
+        />
+        <span className="small muted">3 to 20 letters, numbers, dots or underscores. They sign in with this.</span>
+      </label>
+
+      <label className="stack-8">
+        <span className="field-label">4-digit PIN</span>
+        <input
+          className="input pin-field"
+          type="password"
+          inputMode="numeric"
+          autoComplete="new-password"
+          pattern="[0-9]*"
+          maxLength={4}
+          value={draft.pin}
+          onChange={(e) => update({ pin: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+        />
+        <span className="small muted">Tell them the PIN. You can reset it any time in Controls.</span>
+      </label>
+
       <section className="panel panel-list" aria-label="Limits">
         <Toggle
           title="Quiet hours"
@@ -214,22 +258,25 @@ export function ChildProfile({ draft, update, back, onActivate }) {
         <Toggle title="Club requests need my approval" detail="Always on for teen accounts." on required />
       </section>
 
+      <FieldError>{error}</FieldError>
+
       <div className="detail-footer onboard-footer">
-        <button type="button" className="btn btn-primary" disabled={!ready} onClick={onActivate}>
-          Open {draft.teenName.trim() || 'their'} account
+        <button type="button" className="btn btn-primary" disabled={!ready || busy} onClick={onActivate}>
+          {busy ? 'Opening…' : `Open ${draft.teenName.trim() || 'their'} account`}
         </button>
       </div>
     </main>
   );
 }
 
-export function Activated({ draft, onHandOver, onDashboard }) {
+export function Activated({ draft, onHandOver, onDashboard, error }) {
   const allowed = consentItems.filter((item) => draft.consent[item.id]);
 
   return (
     <main className="page onboard">
       <StepHeader title={`${draft.teenName}'s account is open`}>
-        {draft.teenName} can now use everything you allowed.
+        {draft.teenName} can now use everything you allowed. They sign in as <strong>{draft.login}</strong> with the PIN
+        you chose.
       </StepHeader>
 
       <section className="panel" aria-label="What you allowed">
@@ -246,6 +293,8 @@ export function Activated({ draft, onHandOver, onDashboard }) {
           ))}
         </ul>
       </section>
+
+      <FieldError>{error}</FieldError>
 
       <div className="detail-footer onboard-footer stack-12">
         <button type="button" className="btn btn-primary" onClick={onHandOver}>
