@@ -3,13 +3,13 @@ import { Icon } from '../icons.jsx';
 export const roleTabs = {
   teen: [
     { id: 'today', label: 'Today', icon: 'home' },
-    { id: 'clubs', label: 'Discover', icon: 'sparkles' },
+    { id: 'clubs', label: 'Discover', icon: 'compass' },
     { id: 'learn', label: 'Learn', icon: 'bookOpen' },
     { id: 'mentor', label: 'Mentor', icon: 'message' }
   ],
   guardian: [
     { id: 'guardian', label: 'Family', icon: 'shield' },
-    { id: 'clubs', label: 'Clubs', icon: 'sparkles' },
+    { id: 'clubs', label: 'Clubs', icon: 'compass' },
     { id: 'messages', label: 'Messages', icon: 'message' },
     { id: 'account', label: 'Account', icon: 'sliders' }
   ],

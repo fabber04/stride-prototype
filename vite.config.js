@@ -64,7 +64,7 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         // Cache the app shell and the club photos so it opens with no data.
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,jpg}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,jpg}', '**/*-latin-*.woff2'],
         navigateFallbackDenylist: [/^\/api\//]
       }
     })

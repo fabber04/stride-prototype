@@ -1,20 +1,18 @@
-import { Icon } from '../../icons.jsx';
+import Wordmark from '../../components/Wordmark.jsx';
 
 export default function Welcome({ go }) {
   return (
     <main className="page onboard">
       <div className="onboard-hero">
-        <span className="onboard-mark" aria-hidden="true">
-          <Icon name="sparkles" size={30} strokeWidth={1.8} />
-        </span>
+        <Wordmark size="lg" />
         <h1 className="display">
           Things to do,
           <br />
           <em>people who care.</em>
         </h1>
         <p className="body-muted">
-          Verified clubs, checked mentors and short lessons for 12 to 17 year olds. A parent or guardian approves
-          everything.
+          Verified clubs, vetted mentors and short lessons for 12 to 17 year olds, with a parent or guardian
+          approving every step.
         </p>
       </div>
 

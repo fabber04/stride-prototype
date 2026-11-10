@@ -279,11 +279,17 @@ export default function Guardian() {
               <strong>Stride · {kid.name}'s week</strong>
             </p>
             <p>
-              ✅ {confirmed} of {goal} sessions confirmed
+              {confirmed} of {goal} sessions confirmed by club leaders.
             </p>
-            {pendingCount > 0 && <p>🕒 {pendingCount} club {pendingCount === 1 ? 'request' : 'requests'} waiting for you</p>}
-            {recentBadges[0] && <p>🏅 Latest badge: {recentBadges[0].name}</p>}
-            <p>💬 {mentorMessages} mentor {mentorMessages === 1 ? 'message' : 'messages'}</p>
+            {pendingCount > 0 && (
+              <p>
+                {pendingCount} club {pendingCount === 1 ? 'request is' : 'requests are'} waiting for you.
+              </p>
+            )}
+            {recentBadges[0] && <p>Latest badge: {recentBadges[0].name}.</p>}
+            <p>
+              {mentorMessages} {mentorMessages === 1 ? 'message' : 'messages'} from a mentor.
+            </p>
             <span className="bubble-time">Sundays, 6 pm</span>
           </div>
           {!state.summarySent ? (

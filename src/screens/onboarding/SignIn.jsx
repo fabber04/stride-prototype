@@ -103,8 +103,8 @@ export default function SignIn({ back, role = 'teen', go }) {
         </p>
       )}
 
-      <section className="stack-8" aria-label="Demo accounts">
-        <h2 className="section-title">Try a demo account</h2>
+      <details className="demo-box">
+        <summary>Demo accounts</summary>
         <div className="panel panel-list">
           {demos.map((d) => (
             <button key={d.login} type="button" className="demo-login" onClick={() => signIn(d.login, d.secret)} disabled={busy}>
@@ -118,7 +118,7 @@ export default function SignIn({ back, role = 'teen', go }) {
             </button>
           ))}
         </div>
-      </section>
+      </details>
     </main>
   );
 }

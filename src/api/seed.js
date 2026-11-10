@@ -31,7 +31,7 @@ export const demoLogins = [
   { kind: 'mentor', label: 'Farai Mapfumo', role: 'Club leader, Football Academy', login: 'farai', secret: DEMO_PASSWORD }
 ];
 
-export const teenColors = ['#e5484d', '#12a594', '#8e4ec6', '#f08a24', '#2f6fde', '#d6409f'];
+export const teenColors = ['#b4533f', '#2f6f63', '#6a5a8a', '#a87632', '#2c5784', '#94506a'];
 
 const collections = ['users', 'mentors', 'clubs', 'lessons', 'memberships', 'requests', 'attendance', 'tasks', 'badges', 'messages', 'reports'];
 

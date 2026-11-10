@@ -62,7 +62,6 @@ function TaskCard({ db, task, api }) {
             Send back
           </button>
           <button type="button" className="btn btn-primary grow" disabled={busy} onClick={() => review(true)}>
-            <Icon name="award" size={18} strokeWidth={1.8} />
             Confirm badge
           </button>
         </div>

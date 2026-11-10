@@ -171,7 +171,7 @@ export default function Learn() {
         ) : !state.recordShared ? (
           <button type="button" className="btn record-btn" onClick={() => set({ recordShared: true })}>
             <Icon name="send" size={18} strokeWidth={1.8} />
-            Share with a school or employer
+            Share my record
           </button>
         ) : (
           <Status>A read-only link was sent on WhatsApp. It shows confirmed entries only.</Status>
