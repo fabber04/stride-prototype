@@ -21,11 +21,14 @@ export function hashSecret(secret) {
   return `fnv1a$${h.toString(16).padStart(8, '0')}`;
 }
 
+// `kind` matches the welcome screen's buttons: teen, guardian or mentor.
 export const demoLogins = [
-  { label: 'Tino', role: 'Teen, 14', login: 'tino', secret: DEMO_PIN },
-  { label: 'Chiedza Moyo', role: "Guardian, Tino and Rudo's mother", login: 'chiedza@example.com', secret: DEMO_PASSWORD },
-  { label: 'Fabulous Lashid', role: 'Mentor, Junior Coders', login: 'fabulous', secret: DEMO_PASSWORD },
-  { label: 'Farai Mapfumo', role: 'Club leader, Football Academy', login: 'farai', secret: DEMO_PASSWORD }
+  { kind: 'teen', label: 'Tino', role: 'Teen, 14', login: 'tino', secret: DEMO_PIN },
+  { kind: 'teen', label: 'Rudo', role: 'Teen, 16', login: 'rudo', secret: DEMO_PIN },
+  { kind: 'guardian', label: 'Chiedza Moyo', role: "Guardian, Tino and Rudo's mother", login: 'chiedza@example.com', secret: DEMO_PASSWORD },
+  { kind: 'guardian', label: 'Tendai Ncube', role: 'Guardian of four teens', login: 'tendai@example.com', secret: DEMO_PASSWORD },
+  { kind: 'mentor', label: 'Fabulous Lashid', role: 'Mentor, Junior Coders', login: 'fabulous', secret: DEMO_PASSWORD },
+  { kind: 'mentor', label: 'Farai Mapfumo', role: 'Club leader, Football Academy', login: 'farai', secret: DEMO_PASSWORD }
 ];
 
 export const teenColors = ['#e5484d', '#12a594', '#8e4ec6', '#f08a24', '#2f6fde', '#d6409f'];

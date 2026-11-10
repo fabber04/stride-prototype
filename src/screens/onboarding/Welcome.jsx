@@ -19,16 +19,15 @@ export default function Welcome({ go }) {
       </div>
 
       <div className="stack-12 onboard-actions">
-        <button type="button" className="btn btn-primary" onClick={() => go('age')}>
+        <button type="button" className="btn btn-primary" onClick={() => go('signIn:teen')}>
           I'm a teen
         </button>
-        <button type="button" className="btn btn-ghost" onClick={() => go('account')}>
+        <button type="button" className="btn btn-ghost" onClick={() => go('signIn:guardian')}>
           I'm a parent or guardian
         </button>
-        <button type="button" className="link-btn" onClick={() => go('signIn')}>
-          I already have an account
+        <button type="button" className="btn btn-ghost" onClick={() => go('signIn:mentor')}>
+          I'm a mentor
         </button>
-        <p className="fine">Mentors and club leaders sign in with the account Stride gave them.</p>
       </div>
     </main>
   );

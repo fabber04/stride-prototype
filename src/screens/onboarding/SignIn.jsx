@@ -5,7 +5,35 @@ import FieldError from '../../components/FieldError.jsx';
 import { attempt, useBackend } from '../../api/index.jsx';
 import { demoLogins } from '../../api/seed.js';
 
-export default function SignIn({ back }) {
+const copy = {
+  teen: {
+    title: 'Hi there',
+    intro: 'Sign in with the username and PIN your guardian set up for you.',
+    loginLabel: 'Username',
+    secretLabel: 'PIN',
+    numeric: true,
+    newHere: 'New to Stride? Get started',
+    newStep: 'age'
+  },
+  guardian: {
+    title: 'Welcome back',
+    intro: 'Sign in with your phone number or email and your password.',
+    loginLabel: 'Phone number or email',
+    secretLabel: 'Password',
+    newHere: 'New here? Set up your teen',
+    newStep: 'account'
+  },
+  mentor: {
+    title: 'Mentors and club leaders',
+    intro: 'Sign in with the account Stride gave you after your checks.',
+    loginLabel: 'Username',
+    secretLabel: 'Password'
+  }
+};
+
+export default function SignIn({ back, role = 'teen', go }) {
+  const text = copy[role] || copy.teen;
+  const demos = demoLogins.filter((d) => d.kind === role);
   const { api } = useBackend();
   const [login, setLogin] = useState('');
   const [secret, setSecret] = useState('');
@@ -28,13 +56,13 @@ export default function SignIn({ back }) {
 
   return (
     <main className="page onboard">
-      <StepHeader onBack={back} title="Welcome back">
-        Teens use their username and PIN. Guardians use their phone number or email and password.
+      <StepHeader onBack={back} title={text.title}>
+        {text.intro}
       </StepHeader>
 
       <form className="stack-12" onSubmit={onSubmit}>
         <label className="stack-8">
-          <span className="field-label">Username, phone or email</span>
+          <span className="field-label">{text.loginLabel}</span>
           <input
             className="input"
             autoCapitalize="none"
@@ -45,10 +73,11 @@ export default function SignIn({ back }) {
           />
         </label>
         <label className="stack-8">
-          <span className="field-label">PIN or password</span>
+          <span className="field-label">{text.secretLabel}</span>
           <input
-            className="input"
+            className={text.numeric ? 'input pin-field' : 'input'}
             type="password"
+            inputMode={text.numeric ? 'numeric' : undefined}
             autoComplete="current-password"
             value={secret}
             onChange={(e) => setSecret(e.target.value)}
@@ -60,10 +89,24 @@ export default function SignIn({ back }) {
         </button>
       </form>
 
+      {text.newStep && (
+        <button type="button" className="btn btn-ghost" onClick={() => go(text.newStep)}>
+          {text.newHere}
+        </button>
+      )}
+      {role === 'mentor' && (
+        <p className="fine fine-left">
+          Want to mentor? Every mentor passes an ID check, safeguarding training and reference checks first.{' '}
+          <a className="see-all" href="mailto:mentors@stride.example?subject=Mentor%20application">
+            Apply to mentor
+          </a>
+        </p>
+      )}
+
       <section className="stack-8" aria-label="Demo accounts">
         <h2 className="section-title">Try a demo account</h2>
         <div className="panel panel-list">
-          {demoLogins.map((d) => (
+          {demos.map((d) => (
             <button key={d.login} type="button" className="demo-login" onClick={() => signIn(d.login, d.secret)} disabled={busy}>
               <span className="stack-2 grow min-0">
                 <span className="row-title">{d.label}</span>

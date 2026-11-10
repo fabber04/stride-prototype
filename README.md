@@ -24,7 +24,7 @@ Open the network link Vite prints on your phone (same Wi-Fi) to see it at real s
 | Fabulous Lashid, mentor at Junior Coders | `fabulous` | `stride` |
 | Farai Mapfumo, leads Football Academy | `farai` | `stride` |
 
-Every other teen uses PIN `1234` (`rudo`, `ropa`, `kuda`, `tapiwa`, `farai.c`). Every mentor signs in with their profile id (`charlene`, `eric`, `simba`, `nyasha`, `ruvimbo`, `blessing`, `chipo`) and `stride`. The sign-in screen lists the main ones. Account, Reset demo data puts everything back.
+Every other teen uses PIN `1234` (`rudo`, `ropa`, `kuda`, `tapiwa`, `farai.c`). Every mentor signs in with their profile id (`charlene`, `eric`, `simba`, `nyasha`, `ruvimbo`, `blessing`, `chipo`) and `stride`. The welcome screen has a button for each role (teen, parent or guardian, mentor), and each sign-in lists its demo accounts. Account, Reset demo data puts everything back.
 
 ### The demo loop
 

@@ -127,7 +127,10 @@ export default function Onboarding({ mode }) {
 
   switch (step) {
     case 'signIn':
-      return <SignIn back={back} />;
+    case 'signIn:teen':
+    case 'signIn:guardian':
+    case 'signIn:mentor':
+      return <SignIn key={step} back={back} go={go} role={step.split(':')[1] || 'teen'} />;
     case 'age':
       return <AgeCheck {...props} />;
     case 'young':
