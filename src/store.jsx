@@ -1,40 +1,30 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
-// One shared store so choices survive moving between screens
-// (a club request made in Clubs shows up in the Guardian view).
+// Per-device UI state only. Accounts and everything shared live in the backend (src/api).
 const StoreContext = createContext(null);
 
-// Account and consent survive a reload; everything else is demo state that resets.
-const SAVED_KEYS = ['onboarded', 'account', 'consent', 'consentLog', 'pendingInvite', 'paused', 'quietHours'];
-const STORAGE_KEY = 'stride-account';
+const SAVED_KEYS = ['pendingInvite', 'saved', 'parentGroups'];
+const STORAGE_KEY = 'stride-device';
 
 const initialState = {
   clubFilter: 'All',
   clubSearch: '',
-  requested: { coders: true },
-  decisions: {},
   saved: { python: true, chess: true, voice: true },
   playing: {},
-  taskDone: {},
-  child: 'tino',
+  child: null, // which teen a guardian is looking at
   summarySent: false,
   parentGroups: {},
   skipped: {},
   learnFilter: 'All',
-  steps: {},
   recordShared: false,
-  onboarded: false,
-  account: null,
-  consent: null,
-  consentLog: [],
   pendingInvite: null,
-  paused: false,
-  quietHours: true
+  setup: null // { mode } while onboarding runs, so it survives the session changing mid-flow
 };
 
 function loadSaved() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    return Object.fromEntries(SAVED_KEYS.filter((k) => k in saved).map((k) => [k, saved[k]]));
   } catch {
     return {};
   }
@@ -47,16 +37,14 @@ export function StoreProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    const saved = Object.fromEntries(SAVED_KEYS.map((key) => [key, state[key]]));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
-  }, [state]);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.fromEntries(SAVED_KEYS.map((k) => [k, state[k]]))));
+    } catch {
+      // private mode: nothing to keep
+    }
+  }, [state.pendingInvite, state.saved, state.parentGroups]);
 
-  const reset = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setState(initialState);
-  }, []);
-
-  return <StoreContext.Provider value={{ state, set, reset }}>{children}</StoreContext.Provider>;
+  return <StoreContext.Provider value={{ state, set }}>{children}</StoreContext.Provider>;
 }
 
 export function useStore() {

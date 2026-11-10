@@ -3,20 +3,38 @@ import Cover from '../components/Cover.jsx';
 import SectionHead from '../components/SectionHead.jsx';
 import Status from '../components/Status.jsx';
 import { useStore } from '../store.jsx';
-import { learnFilters, lessons, record } from '../data.js';
+import { useBackend } from '../api/index.jsx';
+import { learnFilters } from '../data.js';
+import { attendanceFor, badgesFor, lessonList, taskFor, teenLabel, weekHistory } from '../api/selectors.js';
+import { formatShort } from '../api/dates.js';
 
-const lessonImage = (lesson) => `lessons/${lesson.id}.webp`;
+function lessonTag(lesson, task) {
+  const done = task ? Object.values(task.steps || {}).filter(Boolean).length : 0;
+  if (task?.status === 'confirmed') return <span className="tag tag-green tag-inline">Badge earned</span>;
+  if (task?.status === 'submitted') return <span className="tag tag-green tag-inline">Waiting to confirm</span>;
+  if (task?.status === 'returned') return <span className="tag tag-warn-soft tag-inline">Sent back</span>;
+  if (done > 0) return <span className="tag tag-blue tag-inline">{done} of {lesson.steps.length} steps</span>;
+  return (
+    <span className="tag tag-blue tag-inline">
+      <Icon name="award" size={12} strokeWidth={2.2} /> {lesson.badge}
+    </span>
+  );
+}
 
 export default function Learn() {
   const { state, set } = useStore();
+  const { db, user: teen } = useBackend();
+  const lessons = lessonList(db);
   const filter = state.learnFilter;
   const savedCount = lessons.filter((l) => state.saved[l.id]).length;
-  const pending = lessons.filter((l) => state.taskDone[l.id]);
-  const current = lessons.find((l) => l.watched > 0 && !state.taskDone[l.id]);
-  const visible = lessons.filter((l) =>
-    filter === 'All' ? true : filter === 'Saved' ? state.saved[l.id] : l.type === filter
-  );
-  const stepsDone = (lesson) => Object.values(state.steps[lesson.id] || {}).filter(Boolean).length;
+  const task = (l) => taskFor(db, teen.id, l.id);
+  const pending = lessons.filter((l) => task(l)?.status === 'submitted');
+  const current = lessons.find((l) => ['draft', 'returned'].includes(task(l)?.status));
+  const visible = lessons.filter((l) => (filter === 'All' ? true : filter === 'Saved' ? state.saved[l.id] : l.type === filter));
+  const badges = badgesFor(db, teen.id);
+  const sessions = attendanceFor(db, teen.id).length;
+  const weeksOnGoal = weekHistory(db, teen, 52).filter((w) => w.met).length;
+  const image = (lesson) => lesson.image || undefined;
 
   return (
     <main className="page">
@@ -39,14 +57,14 @@ export default function Learn() {
 
       {current && (
         <a className="continue" href={`#/lesson/${current.id}`} aria-label={`Continue ${current.title}`}>
-          <Cover type={current.type} size="lg" image={lessonImage(current)} />
+          <Cover type={current.type} size="lg" image={image(current)} />
           <span className="continue-body">
             <span className="continue-eyebrow">
-              Continue · {current.watched} of {current.minutes} min
+              Continue · {Object.keys(task(current).steps).length} of {current.steps.length} steps
             </span>
             <span className="continue-title">{current.title}</span>
             <span className="continue-progress" aria-hidden="true">
-              <span style={{ width: `${(current.watched / current.minutes) * 100}%` }} />
+              <span style={{ width: `${(Object.keys(task(current).steps).length / current.steps.length) * 100}%` }} />
             </span>
           </span>
           <span className="continue-play" aria-hidden="true">
@@ -71,38 +89,25 @@ export default function Learn() {
 
       {visible.length > 0 ? (
         <div className="lesson-grid">
-          {visible.map((lesson) => {
-            const done = stepsDone(lesson);
-            return (
-              <a className="lesson-tile" key={lesson.id} href={`#/lesson/${lesson.id}`}>
-                <Cover type={lesson.type} size="md" image={lessonImage(lesson)}>
-                  <span className="tag tag-dark lesson-time">
-                    <PlayFill size={9} /> {lesson.minutes} min
-                  </span>
-                  {state.saved[lesson.id] && (
-                    <span className="lesson-saved" aria-label="Saved offline">
-                      <Icon name="check" size={12} strokeWidth={3} />
-                    </span>
-                  )}
-                </Cover>
-                <span className="lesson-tile-body">
-                  <span className="lesson-tile-title">{lesson.title}</span>
-                  <span className="row-meta">{lesson.by}</span>
-                  {state.taskDone[lesson.id] ? (
-                    <span className="tag tag-green tag-inline">Waiting to confirm</span>
-                  ) : done > 0 ? (
-                    <span className="tag tag-blue tag-inline">
-                      {done} of {lesson.steps.length} steps
-                    </span>
-                  ) : (
-                    <span className="tag tag-blue tag-inline">
-                      <Icon name="award" size={12} strokeWidth={2.2} /> {lesson.badge}
-                    </span>
-                  )}
+          {visible.map((lesson) => (
+            <a className="lesson-tile" key={lesson.id} href={`#/lesson/${lesson.id}`}>
+              <Cover type={lesson.type} size="md" image={image(lesson)}>
+                <span className="tag tag-dark lesson-time">
+                  <PlayFill size={9} /> {lesson.minutes} min
                 </span>
-              </a>
-            );
-          })}
+                {state.saved[lesson.id] && (
+                  <span className="lesson-saved" aria-label="Saved offline">
+                    <Icon name="check" size={12} strokeWidth={3} />
+                  </span>
+                )}
+              </Cover>
+              <span className="lesson-tile-body">
+                <span className="lesson-tile-title">{lesson.title}</span>
+                <span className="row-meta">{lesson.by}</span>
+                {lessonTag(lesson, task(lesson))}
+              </span>
+            </a>
+          ))}
         </div>
       ) : (
         <p className="body-muted empty">Nothing here yet. Save a lesson to play it with no data.</p>
@@ -112,22 +117,22 @@ export default function Learn() {
       <section className="record-card" aria-label="Your record">
         <div className="record-head">
           <span className="stack-2">
-            <span className="record-name">Tino M.</span>
+            <span className="record-name">{teenLabel(teen)}</span>
             <span className="record-sub">Stride record · every entry confirmed by an adult</span>
           </span>
           <Icon name="shield" size={22} strokeWidth={1.8} />
         </div>
         <div className="record-stats">
           <div>
-            <span className="record-num num">{record.sessions}</span>
+            <span className="record-num num">{sessions}</span>
             <span className="record-sub">sessions</span>
           </div>
           <div>
-            <span className="record-num num">{record.badges.length}</span>
+            <span className="record-num num">{badges.length}</span>
             <span className="record-sub">badges</span>
           </div>
           <div>
-            <span className="record-num num">{record.weeks}</span>
+            <span className="record-num num">{weeksOnGoal}</span>
             <span className="record-sub">weeks on goal</span>
           </div>
         </div>
@@ -143,20 +148,27 @@ export default function Learn() {
               </span>
             </li>
           ))}
-          {record.badges.map((badge) => (
-            <li key={badge.name}>
+          {badges.map((badge) => (
+            <li key={badge.id}>
               <span className="record-badge" aria-hidden="true">
                 <Icon name="award" size={16} strokeWidth={1.8} />
               </span>
               <span className="stack-2 grow">
                 <span className="row-title">{badge.name}</span>
-                <span className="record-sub">Signed off by {badge.by}</span>
+                <span className="record-sub">Signed off by {db.mentors[badge.mentorId]?.short || 'a mentor'}</span>
               </span>
-              <span className="record-sub num">{badge.date}</span>
+              <span className="record-sub num">{formatShort(badge.at)}</span>
             </li>
           ))}
+          {pending.length === 0 && badges.length === 0 && (
+            <li>
+              <span className="record-sub">Finish a lesson task to earn your first badge.</span>
+            </li>
+          )}
         </ul>
-        {!state.recordShared ? (
+        {!teen.consent.record ? (
+          <p className="record-sub">Ask your guardian if you want to share your record with a school.</p>
+        ) : !state.recordShared ? (
           <button type="button" className="btn record-btn" onClick={() => set({ recordShared: true })}>
             <Icon name="send" size={18} strokeWidth={1.8} />
             Share with a school or employer

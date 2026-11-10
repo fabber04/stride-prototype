@@ -1,51 +1,52 @@
-// Sample data for the prototype. Replace with real data (for example from Firebase) later.
+// Catalogue data for the prototype. src/api/seed.js copies it into the database, so screens read
+// clubs, lessons and mentors from the backend, not from here.
 // `day` is the weekday of the club session (0 = Sunday).
 
 export const clubs = [
   {
-    id: 'football', name: 'Football Academy', type: 'Sport', day: 6, time: '9:00 am',
+    id: 'football', mentorId: 'farai', name: 'Football Academy', type: 'Sport', day: 6, time: '9:00 am',
     when: 'Saturdays, 9:00 am', short: 'Sat, 9:00 am', ages: 'Ages 12 to 17', range: '12–17',
     lead: 'Coach · Farai M.', session: 'Training session', confirmer: 'Coach',
     note: 'Coaches confirm attendance.',
     about: 'Weekly training with a checked coach. Your guardian approves before you join, and sees every session the coach confirms.'
   },
   {
-    id: 'coders', name: 'Junior Coders', type: 'Tech', day: 3, time: '4:30 pm',
+    id: 'coders', mentorId: 'fabulous', name: 'Junior Coders', type: 'Tech', day: 3, time: '4:30 pm',
     when: 'Wednesdays, 4:30 pm', short: 'Wed, 4:30 pm', ages: 'Ages 13 to 17', range: '13–17',
     lead: 'Mentor · Fabulous L.', session: 'Coding session', confirmer: 'Mentor',
     note: 'Led by checked student mentors.',
     about: 'Build small apps and games with student mentors who have passed ID and safeguarding checks.'
   },
   {
-    id: 'robotics', name: 'Robotics & AI', type: 'STEM', day: 5, time: '4:00 pm',
+    id: 'robotics', mentorId: 'ruvimbo', name: 'Robotics & AI', type: 'STEM', day: 5, time: '4:00 pm',
     when: 'Fridays, 4:00 pm', short: 'Fri, 4:00 pm', ages: 'Ages 12 to 16', range: '12–16',
     lead: 'Mentor · Ruvimbo K.', session: 'Build session', confirmer: 'Mentor',
     note: 'Hands-on projects and real AI ideas.',
     about: 'Hands-on robot builds and simple AI projects in small groups, led by checked mentors.'
   },
   {
-    id: 'vocational', name: 'Vocational Training', type: 'Career', day: 6, time: '10:00 am',
+    id: 'vocational', mentorId: 'blessing', name: 'Vocational Training', type: 'Career', day: 6, time: '10:00 am',
     when: 'Saturdays, 10:00 am', short: 'Sat, 10:00 am', ages: 'Ages 13 to 17', range: '13–17',
     lead: 'Trainer · Blessing T.', session: 'Workshop', confirmer: 'Trainer',
     note: 'Practical skills for future work readiness.',
     about: 'Practical skills like basic carpentry, tailoring and repairs, taught by checked trainers.'
   },
   {
-    id: 'chess', name: 'Chess and Debate Club', shortName: 'Chess and Debate', type: 'Study', day: 2, time: '4:00 pm',
+    id: 'chess', mentorId: 'simba', name: 'Chess and Debate Club', shortName: 'Chess and Debate', type: 'Study', day: 2, time: '4:00 pm',
     when: 'Tuesdays, 4:00 pm', short: 'Tue, 4:00 pm', ages: 'Ages 12 to 17', range: '12–17',
     lead: 'Coach · Simba D.', session: 'Club session', confirmer: 'Coach',
     note: 'Coaches confirm attendance.',
     about: 'Chess games and friendly debates that build focus and confidence. Coaches confirm every session.'
   },
   {
-    id: 'choir', name: 'Community Choir', type: 'Arts', day: 4, time: '4:30 pm',
+    id: 'choir', mentorId: 'nyasha', name: 'Community Choir', type: 'Arts', day: 4, time: '4:30 pm',
     when: 'Thursdays, 4:30 pm', short: 'Thu, 4:30 pm', ages: 'Ages 12 to 17', range: '12–17',
     lead: 'Leader · Nyasha P.', session: 'Rehearsal', confirmer: 'Leader',
     note: 'Leaders confirm attendance.',
     about: 'Weekly rehearsals and local performances with a checked choir leader.'
   },
   {
-    id: 'netball', name: 'Netball Club', type: 'Sport', day: 1, time: '4:00 pm',
+    id: 'netball', mentorId: 'chipo', name: 'Netball Club', type: 'Sport', day: 1, time: '4:00 pm',
     when: 'Mondays, 4:00 pm', short: 'Mon, 4:00 pm', ages: 'Ages 12 to 17', range: '12–17',
     lead: 'Coach · Chipo G.', session: 'Training session', confirmer: 'Coach',
     note: 'Coaches confirm attendance.',
@@ -53,7 +54,6 @@ export const clubs = [
   }
 ];
 
-export const clubById = Object.fromEntries(clubs.map((c) => [c.id, c]));
 
 export const categories = [
   { id: 'Sport', icon: 'sport' },
@@ -67,9 +67,6 @@ export const categories = [
 export const categoryIcon = Object.fromEntries(categories.map((c) => [c.id, c.icon]));
 
 export const clubFilters = ['All', ...categories.map((c) => c.id)];
-
-// The clubs Tino already goes to, shown on Today.
-export const myClubs = ['football', 'chess'];
 
 // What every club's leader passed before the club could join Stride.
 export function clubChecks(club) {
@@ -111,58 +108,40 @@ export const clubFriends = {
 // Places left this term, only where a club is nearly full.
 export const clubSpots = { robotics: 2, vocational: 1, coders: 4 };
 
-// Each child's week, used by the guardian's week plan. Days with nothing planned show as gaps.
-export const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-export const childColor = { tino: '#e5484d', rudo: '#12a594' };
-export const weekPlan = {
-  tino: { Tue: { club: 'chess' }, Sat: { club: 'football' }, Sun: { label: 'Family', icon: 'home' } },
-  rudo: { Mon: { club: 'netball' }, Thu: { club: 'choir' }, Sun: { label: 'Family', icon: 'home' } }
-};
-
-// Tino's growth record: confirmed sessions and badges, each signed off by an adult.
-export const record = {
-  sessions: 14,
-  weeks: 6,
-  badges: [
-    { name: 'Team Player', by: 'Coach Farai M.', date: '12 Oct', club: 'Football Academy' },
-    { name: 'First Gambit', by: 'Coach Simba D.', date: '28 Oct', club: 'Chess and Debate Club' }
-  ]
-};
-
 // `watched` is minutes already played; `club` is the club whose leader sets and confirms the task.
 export const lessons = [
   {
-    id: 'python', type: 'Tech', club: 'coders', title: 'Build a quiz in 20 lines of Python', minutes: 6, size: '14 MB',
+    id: 'python', mentorId: 'fabulous', type: 'Tech', club: 'coders', title: 'Build a quiz in 20 lines of Python', minutes: 6, size: '14 MB',
     by: 'Fabulous L.', from: 'from your mentor Fabulous L.', badge: 'Builder', confirmer: 'mentor', watched: 0,
     task: 'Write a 5 question quiz and show it at Junior Coders.',
     steps: ['Watch the lesson to the end', 'Write five questions with answers', 'Run it for a friend at Junior Coders']
   },
   {
-    id: 'chess', type: 'Study', club: 'chess', title: 'Three opening traps to know', minutes: 8, size: '22 MB',
+    id: 'chess', mentorId: 'simba', type: 'Study', club: 'chess', title: 'Three opening traps to know', minutes: 8, size: '22 MB',
     by: 'Simba D.', from: 'from your Chess and Debate coach', badge: 'Strategist', confirmer: 'coach', watched: 3,
     task: 'Play each trap once against a friend and note what happened.',
     steps: ['Set up each trap on a board', 'Play each one against a friend', 'Write one line on what happened']
   },
   {
-    id: 'voice', type: 'Arts', club: 'choir', title: 'Warm up your voice in 60 seconds', minutes: 5, size: '9 MB',
+    id: 'voice', mentorId: 'nyasha', type: 'Arts', club: 'choir', title: 'Warm up your voice in 60 seconds', minutes: 5, size: '9 MB',
     by: 'Nyasha P.', from: 'from your choir leader', badge: 'Steady Voice', confirmer: 'leader', watched: 0,
     task: 'Do the warm up before each rehearsal this week.',
     steps: ['Learn the four warm up sounds', 'Do it before Thursday rehearsal', 'Do it before the next one too']
   },
   {
-    id: 'linebot', type: 'STEM', club: 'robotics', title: 'Make a robot follow a line', minutes: 9, size: '24 MB',
+    id: 'linebot', mentorId: 'ruvimbo', type: 'STEM', club: 'robotics', title: 'Make a robot follow a line', minutes: 9, size: '24 MB',
     by: 'Ruvimbo K.', from: 'from your Robotics mentor', badge: 'Maker', confirmer: 'mentor', watched: 0,
     task: 'Sketch how the two sensors steer the robot and bring it to Robotics & AI.',
     steps: ['Watch how the sensors see the line', 'Sketch the left and right turns', 'Explain it to your group on Friday']
   },
   {
-    id: 'stool', type: 'Career', club: 'vocational', title: 'Measure twice, cut once', minutes: 7, size: '18 MB',
+    id: 'stool', mentorId: 'blessing', type: 'Career', club: 'vocational', title: 'Measure twice, cut once', minutes: 7, size: '18 MB',
     by: 'Blessing T.', from: 'from your Vocational trainer', badge: 'Craftsperson', confirmer: 'trainer', watched: 0,
     task: 'Measure and mark the four legs of a stool on scrap wood.',
     steps: ['Watch the marking method', 'Mark four equal legs on scrap wood', 'Show your marks to the trainer']
   },
   {
-    id: 'warmup', type: 'Sport', club: 'football', title: 'A five minute warm up that prevents injury', minutes: 5, size: '11 MB',
+    id: 'warmup', mentorId: 'farai', type: 'Sport', club: 'football', title: 'A five minute warm up that prevents injury', minutes: 5, size: '11 MB',
     by: 'Farai M.', from: 'from your Football coach', badge: 'Ready to Play', confirmer: 'coach', watched: 0,
     task: 'Lead the warm up for your team before Saturday training.',
     steps: ['Learn the five moves in order', 'Practise them at home once', 'Lead your team on Saturday']
@@ -171,43 +150,14 @@ export const lessons = [
 
 export const learnFilters = ['All', 'Saved', ...categories.map((c) => c.id)];
 
-export const lessonById = Object.fromEntries(lessons.map((l) => [l.id, l]));
-
-export const children = [
-  { id: 'tino', label: 'Tino' },
-  { id: 'rudo', label: 'Rudo' }
-];
-
-export const guardianData = {
-  tino: {
-    confirmed: 2,
-    goal: 3,
-    clubs: ['football', 'chess'],
-    message: '1 message from a mentor this week.',
-    sessions: [
-      { name: 'Football Academy', detail: 'Saturday, confirmed by the coach' },
-      { name: 'Chess and Debate Club', detail: 'Tuesday, confirmed by the coach' }
-    ]
-  },
-  rudo: {
-    confirmed: 2,
-    goal: 3,
-    clubs: ['netball', 'choir'],
-    message: 'No messages from mentors this week.',
-    sessions: [
-      { name: 'Netball Club', detail: 'Monday, confirmed by the coach' },
-      { name: 'Community Choir', detail: 'Thursday, confirmed by the leader' }
-    ]
-  }
-};
 
 // Mentors a teen can open. `photo` lives in public/mentors; the avatar falls back to initials until it exists.
 // Bios, notes and session counts are sample copy until each mentor replaces them with their own.
-// `matched` is the mentor already paired with Tino. Everyone else appears under More mentors.
+// `listed` mentors appear under More mentors for any teen. Club leaders are mentors too.
 export const mentors = [
   {
     id: 'fabulous',
-    matched: true,
+    listed: true,
     name: 'Fabulous Lashid',
     short: 'Fabulous L.',
     first: 'Fabulous',
@@ -233,6 +183,7 @@ export const mentors = [
   },
   {
     id: 'charlene',
+    listed: true,
     name: 'Charlene Mtetwa',
     short: 'Charlene M.',
     first: 'Charlene',
@@ -258,6 +209,7 @@ export const mentors = [
   },
   {
     id: 'eric',
+    listed: true,
     name: 'Eric Khumalo',
     short: 'Eric K.',
     first: 'Eric',
@@ -283,9 +235,41 @@ export const mentors = [
   }
 ];
 
-export const mentorById = Object.fromEntries(mentors.map((m) => [m.id, m]));
+// Club leaders. They have no photo yet, so their avatar falls back to initials.
+function leader(id, name, clubName, title) {
+  const [first, last] = name.split(' ');
+  return {
+    id,
+    name,
+    short: `${first} ${last[0]}.`,
+    first,
+    initials: `${first[0]}${last[0]}`,
+    photo: null,
+    avatar: null,
+    role: `${title} at ${clubName}`,
+    badge: 'Stride Verified Leader',
+    since: 'Leading a club on Stride',
+    stats: [
+      { value: '3', label: 'checks passed' },
+      { value: '1', label: 'club led' },
+      { value: 'Weekly', label: 'sessions' }
+    ],
+    bio: [`${first} leads ${clubName} every week and confirms each session on Stride.`],
+    parentNote: 'I confirm every session on Stride, so you always know your teen was there.',
+    teaches: [clubName],
+    checks: [`${title} ID checked`, 'Safeguarding training complete', 'Venue and first aid checked']
+  };
+}
 
-// Tino's matched mentor. Screens that say "your mentor" keep using this one.
-export const mentor = mentors.find((m) => m.matched) || mentors[0];
+mentors.push(
+  leader('farai', 'Farai Mapfumo', 'Football Academy', 'Coach'),
+  leader('ruvimbo', 'Ruvimbo Kanengoni', 'Robotics & AI', 'Mentor'),
+  leader('blessing', 'Blessing Tendai', 'Vocational Training', 'Trainer'),
+  leader('simba', 'Simba Dube', 'Chess and Debate Club', 'Coach'),
+  leader('nyasha', 'Nyasha Phiri', 'Community Choir', 'Leader'),
+  leader('chipo', 'Chipo Gumbo', 'Netball Club', 'Coach')
+);
+
+export const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export const reportReasons = ['Something the mentor said', 'Something that felt unsafe', 'Something else'];

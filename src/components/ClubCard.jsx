@@ -1,12 +1,17 @@
 import { Icon, HeartFill } from '../icons.jsx';
 import Cover from './Cover.jsx';
-import { clubCost, clubFriends, clubSpots } from '../data.js';
+import { clubFriends } from '../data.js';
 
-// Photo-led card for the Discover feed: artwork with status pills, then the details.
-export default function ClubCard({ club, requested }) {
-  const friends = clubFriends[club.id] || [];
-  const spots = clubSpots[club.id];
-  const cost = clubCost[club.id];
+const statusTag = {
+  member: <span className="tag tag-green">You're in</span>,
+  pending: <span className="tag tag-green">Asked your guardian</span>,
+  declined: <span className="tag tag-warn-soft">Not now</span>
+};
+
+// Photo-led card for the Discover feed. `status` is the teen's: member, pending, declined or null.
+export default function ClubCard({ club, status, goers }) {
+  const friends = goers || clubFriends[club.id] || [];
+  const spots = club.spots;
 
   return (
     <a className="club-card" href={`#/club/${club.id}`}>
@@ -33,17 +38,14 @@ export default function ClubCard({ club, requested }) {
           </span>
         </span>
         <span className="club-card-foot">
-          <span className="price">{cost.price}</span>
-          {requested ? (
-            <span className="tag tag-green">Asked your guardian</span>
-          ) : (
-            friends.length > 0 && (
+          <span className="price">{club.cost?.price}</span>
+          {statusTag[status] ||
+            (friends.length > 0 && (
               <span className="tag tag-keen">
                 <HeartFill size={12} />
                 {friends.join(' & ')} {friends.length > 1 ? 'go' : 'goes'}
               </span>
-            )
-          )}
+            ))}
         </span>
       </span>
     </a>

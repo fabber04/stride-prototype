@@ -1,5 +1,6 @@
 import { Icon } from '../icons.jsx';
-import { categoryIcon, childColor, children, clubById, weekDays, weekPlan } from '../data.js';
+import { categoryIcon, weekDays } from '../data.js';
+import { clubIdsOf, requestsFor } from '../api/selectors.js';
 
 const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const tileLabel = {
@@ -7,22 +8,24 @@ const tileLabel = {
   chess: 'Chess', choir: 'Choir', netball: 'Netball'
 };
 
-// Builds a child's week from their regular clubs plus any request made in the app.
-function weekFor(childId, requested, decisions) {
-  const plan = { ...weekPlan[childId] };
-  if (childId === 'tino') {
-    Object.keys(requested).forEach((id) => {
-      if (!requested[id] || decisions[id] === 'declined') return;
-      const day = dayName[clubById[id].day];
-      if (!plan[day]) plan[day] = { club: id, pending: decisions[id] !== 'approved' };
-    });
+// A teen's week: their clubs, then clubs waiting for approval, then family routine.
+function weekFor(db, teen) {
+  const plan = {};
+  for (const id of clubIdsOf(db, teen.id)) {
+    const club = db.clubs[id];
+    if (club) plan[dayName[club.day]] ||= { club };
   }
+  for (const r of requestsFor(db, teen.id)) {
+    const club = db.clubs[r.clubId];
+    if (r.status === 'pending' && club) plan[dayName[club.day]] ||= { club, pending: true };
+  }
+  for (const [day, slot] of Object.entries(teen.routine || {})) plan[day] ||= slot;
   return plan;
 }
 
-// One row per child, one tile per day. Empty days are the unsupervised gaps worth filling.
-export default function WeekPlan({ requested, decisions }) {
-  const weeks = children.map((kid) => ({ kid, plan: weekFor(kid.id, requested, decisions) }));
+// One row per teen, one tile per day. Empty days are the unsupervised gaps worth filling.
+export default function WeekPlan({ db, teens }) {
+  const weeks = teens.map((teen) => ({ teen, plan: weekFor(db, teen) }));
   const open = weeks.reduce((n, { plan }) => n + weekDays.filter((d) => !plan[d]).length, 0);
 
   return (
@@ -34,28 +37,28 @@ export default function WeekPlan({ requested, decisions }) {
             {d}
           </span>
         ))}
-        {weeks.map(({ kid, plan }) => (
-          <div className="plan-row" key={kid.id}>
-            <span className="plan-kid" style={{ color: childColor[kid.id] }}>
-              {kid.label}
+        {weeks.map(({ teen, plan }) => (
+          <div className="plan-row" key={teen.id}>
+            <span className="plan-kid" style={{ color: teen.color }}>
+              {teen.name}
             </span>
             {weekDays.map((d) => {
               const slot = plan[d];
               if (!slot) {
                 return (
-                  <a key={d} className="plan-tile is-open" href="#/clubs" aria-label={`${kid.label} has nothing on ${d}. Find a club`}>
+                  <a key={d} className="plan-tile is-open" href="#/clubs" aria-label={`${teen.name} has nothing on ${d}. Find a club`}>
                     <Icon name="plus" size={14} strokeWidth={2} />
                   </a>
                 );
               }
-              const club = slot.club && clubById[slot.club];
-              const label = club ? tileLabel[club.id] : slot.label;
+              const club = slot.club;
+              const label = club ? tileLabel[club.id] || club.name.split(' ')[0] : slot.label;
               const icon = club ? categoryIcon[club.type] : slot.icon;
               return (
                 <span
                   key={d}
                   className={slot.pending ? 'plan-tile is-pending' : club ? 'plan-tile is-club' : 'plan-tile'}
-                  title={`${kid.label}, ${d}: ${club ? club.name : slot.label}${slot.pending ? ' (waiting for you)' : ''}`}
+                  title={`${teen.name}, ${d}: ${club ? club.name : slot.label}${slot.pending ? ' (waiting for you)' : ''}`}
                 >
                   <Icon name={icon} size={14} strokeWidth={1.8} />
                   <span>{label}</span>
@@ -66,7 +69,7 @@ export default function WeekPlan({ requested, decisions }) {
         ))}
       </div>
       <p className="plan-foot">
-        <strong>{open} days still open</strong> · tap a gap to find a club
+        <strong>{open} {open === 1 ? 'day' : 'days'} still open</strong> · tap a gap to find a club
       </p>
     </section>
   );

@@ -1,10 +1,11 @@
 import { Icon } from '../../icons.jsx';
 import StepHeader from '../../components/StepHeader.jsx';
+import FieldError from '../../components/FieldError.jsx';
 import { categories } from '../../data.js';
 
 const goals = [1, 2, 3];
 
-export default function TeenSetup({ draft, update, onDone }) {
+export default function TeenSetup({ draft, update, onDone, error, busy }) {
   const toggle = (id) =>
     update({
       interests: draft.interests.includes(id) ? draft.interests.filter((i) => i !== id) : [...draft.interests, id]
@@ -66,8 +67,10 @@ export default function TeenSetup({ draft, update, onDone }) {
         <span className="small muted">Other teens only see this, never your full name.</span>
       </label>
 
+      <FieldError>{error}</FieldError>
+
       <div className="detail-footer onboard-footer">
-        <button type="button" className="btn btn-primary" disabled={!ready} onClick={onDone}>
+        <button type="button" className="btn btn-primary" disabled={!ready || busy} onClick={onDone}>
           Let's go
         </button>
       </div>

@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { mentor } from '../data.js';
 
-// The mentor's photo, or their initials if the photo is missing or fails to load.
-export default function MentorAvatar({ size = 'md', className = '', person = mentor }) {
+// A mentor's photo, or their initials if there is no photo or it fails to load.
+export default function MentorAvatar({ size = 'md', className = '', person }) {
   const [failed, setFailed] = useState(false);
+  if (!person) return null;
+  const initials = person.initials || person.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
   return (
     <span className={`avatar avatar-${size} ${className}`} aria-hidden="true">
-      {!failed ? (
+      {person.avatar && !failed ? (
         <img className="avatar-img" src={person.avatar} alt="" onError={() => setFailed(true)} draggable="false" />
       ) : (
-        person.initials
+        initials
       )}
     </span>
   );

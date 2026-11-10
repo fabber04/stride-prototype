@@ -1,6 +1,6 @@
 import { Icon } from '../../icons.jsx';
 
-export default function Welcome({ go, onSkip }) {
+export default function Welcome({ go }) {
   return (
     <main className="page onboard">
       <div className="onboard-hero">
@@ -25,9 +25,10 @@ export default function Welcome({ go, onSkip }) {
         <button type="button" className="btn btn-ghost" onClick={() => go('account')}>
           I'm a parent or guardian
         </button>
-        <button type="button" className="link-btn" onClick={onSkip}>
-          Skip and explore the demo
+        <button type="button" className="link-btn" onClick={() => go('signIn')}>
+          I already have an account
         </button>
+        <p className="fine">Mentors and club leaders sign in with the account Stride gave them.</p>
       </div>
     </main>
   );
