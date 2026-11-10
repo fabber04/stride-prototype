@@ -49,7 +49,9 @@ export function createSupabaseStore(env = process.env) {
   return {
     async load() {
       const loaded = await Promise.all(writeOrder.map((t) => readAll(t)));
-      if (loaded[0].length === 0) return null; // no users yet: the handler seeds the demo
+      // Seeded only once the catalogue is there too; a half-finished seed gets filled in again.
+      const has = (table) => loaded[writeOrder.indexOf(table)].length > 0;
+      if (!has('users') || !has('mentors') || !has('clubs') || !has('lessons')) return null;
       const db = emptyDb();
       db.version = DB_VERSION;
       writeOrder.forEach((table, i) => {
@@ -64,6 +66,18 @@ export function createSupabaseStore(env = process.env) {
         fail(`clear ${table}`, error);
       }
       for (const table of writeOrder) await upsert(table, Object.values(db[table] || {}));
+    },
+
+    // Inserts any seed rows that are missing and leaves existing rows alone.
+    async fillMissing(db) {
+      for (const table of writeOrder) {
+        const objects = Object.values(db[table] || {});
+        for (let i = 0; i < objects.length; i += CHUNK) {
+          const rows = objects.slice(i, i + CHUNK).map((o) => toRow(table, o));
+          const { error } = await client.from(table).upsert(rows, { onConflict: 'id', ignoreDuplicates: true });
+          fail(`seed ${table}`, error);
+        }
+      }
     },
 
     async saveChanges(changes) {

@@ -36,9 +36,11 @@ export function createHandler({ store, now = () => new Date(), allowReset = fals
   async function loadDb() {
     const db = await store.load();
     if (db) return db;
+    // First run: fill in the demo. Upsert only, never delete, so two requests seeding at the
+    // same moment write the same rows instead of wiping each other's work.
     const seeded = createSeed(now(), hashPassword);
-    await store.replaceAll(seeded);
-    return seeded;
+    await store.fillMissing(seeded);
+    return (await store.load()) || seeded;
   }
 
   async function sessionUser(db, token) {
@@ -65,6 +67,10 @@ export function createHandler({ store, now = () => new Date(), allowReset = fals
       const userId = await sessionUser(db, token);
 
       if (method === 'snapshot') return reply(db, userId);
+      if (method === 'health') {
+        const counts = Object.fromEntries(collections.map((c) => [c, Object.keys(db[c] || {}).length]));
+        return { status: 200, body: { ok: true, counts } };
+      }
 
       if (method === 'resetDemo') {
         if (!allowReset) throw new ApiError('Resetting the demo is turned off on this server.');

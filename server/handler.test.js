@@ -124,3 +124,27 @@ describe('storage mapping', () => {
     expect(diff(a, b)).toEqual({ users: { upsert: [b.users.t_tino], remove: [] }, requests: { upsert: [], remove: ['r_tino_coders'] } });
   });
 });
+
+describe('seeding', () => {
+  it('survives two requests seeding an empty database at once', async () => {
+    const [a, b] = await Promise.all([handle({ method: 'snapshot' }), handle({ method: 'snapshot' })]);
+    expect(a.status).toBe(200);
+    expect(b.status).toBe(200);
+    const health = await handle({ method: 'health' });
+    expect(health.body.counts).toMatchObject({ clubs: 7, lessons: 6 });
+    expect(health.body.counts.users).toBeGreaterThan(10);
+  });
+
+  it('fills in a half-finished seed without touching existing rows', async () => {
+    await handle({ method: 'snapshot' });
+    const token = await signIn('tino', '1234');
+    await handle({ method: 'updateTeenProfile', args: [{ goal: 3 }], token });
+    const saved = await store.load();
+    delete saved.clubs.football;
+    await store.replaceAll(saved);
+    await store.fillMissing(createSeed(NOW));
+    const after = await store.load();
+    expect(after.clubs.football).toBeDefined();
+    expect(after.users.t_tino.goal).toBe(3);
+  });
+});

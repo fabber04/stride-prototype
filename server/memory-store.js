@@ -10,6 +10,14 @@ export function createMemoryStore() {
     async replaceAll(next) {
       db = structuredClone(next);
     },
+    async fillMissing(seed) {
+      db ||= structuredClone(seed);
+      for (const [name, rows] of Object.entries(seed)) {
+        if (typeof rows !== 'object') continue;
+        db[name] ||= {};
+        for (const [id, row] of Object.entries(rows)) db[name][id] ||= structuredClone(row);
+      }
+    },
     async saveChanges(changes) {
       for (const [name, { upsert, remove }] of Object.entries(changes)) {
         for (const id of remove) delete db[name][id];

@@ -8,7 +8,14 @@ let handle;
 export default async function rpc(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method === 'GET') {
-    res.status(200).json({ ok: true, database: supabaseConfigured() ? 'supabase' : 'missing' });
+    if (!supabaseConfigured()) {
+      res.status(200).json({ ok: true, database: 'missing' });
+      return;
+    }
+    // Row counts only, so you can check the database without signing in.
+    handle ||= createHandler({ store: createSupabaseStore(), allowReset: process.env.STRIDE_ALLOW_RESET === 'true' });
+    const { status, body } = await handle({ method: 'health' });
+    res.status(status).json({ ...body, database: 'supabase' });
     return;
   }
   if (req.method !== 'POST') {
