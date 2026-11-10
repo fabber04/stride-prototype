@@ -30,17 +30,17 @@ The first five are tabs in the bottom bar. Club and Lesson open from a list.
 
 | Route | File | What it shows |
 | --- | --- | --- |
-| `#/today` | `src/screens/Today.jsx` | Weekly streak, categories, your clubs this week, mentor challenge |
+| `#/today` | `src/screens/Today.jsx` | This week's sessions, 8-week streak, your clubs, mentor challenge |
 | `#/clubs` | `src/screens/Clubs.jsx` | Search and filter verified clubs |
-| `#/learn` | `src/screens/Learn.jsx` | Continue learning, lessons from mentors and coaches |
+| `#/learn` | `src/screens/Learn.jsx` | Continue learning, lessons, and a growth record of adult-confirmed sessions and badges |
 | `#/mentor` | `src/screens/Mentor.jsx` | Mentor safety checks, guardian-visible messages, report a concern |
-| `#/guardian` | `src/screens/Guardian.jsx` | Confirmed sessions, approve requests, WhatsApp summary |
-| `#/club/<id>` | `src/screens/ClubDetail.jsx` | Club details, upcoming sessions, ask a guardian to approve |
+| `#/guardian` | `src/screens/Guardian.jsx` | Confirmed sessions, approve requests, other parents at each club, WhatsApp summary |
+| `#/club/<id>` | `src/screens/ClubDetail.jsx` | Club details, the checks the leader passed, who covers the cost, upcoming sessions |
 | `#/lesson/<id>` | `src/screens/Lesson.jsx` | Lesson video, offline task, badge, "I did the task" |
 
 ## Where things live
 
-- `src/styles.css` holds the design tokens (colors, fonts) at the top, then the styles for each part of the app: Outfit, a white ground, thin-bordered cards, a `#4c49e6` indigo accent and pill-shaped chips.
+- `src/styles.css` holds the design tokens (colors, fonts) at the top, then the styles for each part of the app: a calm, near-monochrome look with Instrument Serif headlines, Instrument Sans text, hairline borders, ink-black buttons and one deep green accent for progress.
 - `src/data.js` holds the sample clubs, lessons and children. Swap this for real data.
 - `src/store.jsx` is the shared state, so a club request made in Clubs shows up in the Guardian view.
 - `src/icons.jsx` holds the inline icons.
@@ -48,7 +48,7 @@ The first five are tabs in the bottom bar. Club and Lesson open from a list.
 
 ## Sample data
 
-The names (Stride, Tino, Rudo, Tendai N.) and the clubs are placeholders. Nothing here is real, and no impact numbers are claimed.
+The names (Stride, Tino, Rudo, Fabulous Lashid) and the clubs are placeholders. Nothing here is real, and no impact numbers are claimed.
 
 ## Next steps
 

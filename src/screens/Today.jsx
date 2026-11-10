@@ -1,86 +1,121 @@
-import { Icon } from '../icons.jsx';
+import { Icon, HeartFill } from '../icons.jsx';
 import Cover from '../components/Cover.jsx';
 import SectionHead from '../components/SectionHead.jsx';
 import { useStore } from '../store.jsx';
-import { categories, clubById, myClubs } from '../data.js';
+import MentorAvatar from '../components/MentorAvatar.jsx';
+import { categories, clubById, clubFriends, mentor, myClubs } from '../data.js';
+
+// Last eight weeks, oldest first: 1 = goal met. The current week follows them.
+const history = [1, 1, 0, 1, 0, 1, 1, 1];
+
+const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
 
 export default function Today() {
-  const { state, set } = useStore();
+  const { set } = useStore();
 
   return (
     <main className="page">
-      <header className="topbar">
-        <div className="stack-2">
-          <span className="eyebrow">Welcome back</span>
-          <h1 className="greeting">Tino</h1>
+      <div className="toolbar-row">
+        <div className="toolbar">
+          <a href="#/clubs" aria-label="Find a club">
+            <Icon name="search" size={20} strokeWidth={1.8} />
+          </a>
+          <a href="#/mentor" className="has-dot" aria-label="1 new message from your mentor">
+            <Icon name="bell" size={20} strokeWidth={1.8} />
+          </a>
         </div>
-        <div className="row-4">
-          <a className="icon-btn" href="#/clubs" aria-label="Find a club">
-            <Icon name="search" />
-          </a>
-          <a className="icon-btn" href="#/mentor" aria-label="1 new message from your mentor">
-            <Icon name="bell" />
-            <span className="dot" aria-hidden="true" />
-          </a>
+      </div>
+
+      <header className="title-block">
+        <h1 className="h1">Hi, Tino</h1>
+        <div className="subline">
+          <span>
+            <strong>2 of 3 sessions</strong> this week
+          </span>
+          <span>{today}</span>
+        </div>
+        <div className="progress-line" role="progressbar" aria-label="Sessions this week" aria-valuemin={0} aria-valuemax={3} aria-valuenow={2}>
+          <span style={{ width: '66.6%' }} />
         </div>
       </header>
 
-      <section className="hero" aria-label="Weekly streak">
-        <div className="hero-head">
-          <span className="hero-title">Weekly streak</span>
-          <span className="hero-pill">3 weeks running</span>
-        </div>
-        <div className="hero-row">
-          <div className="stack-8 grow">
-            <div className="hero-progress-label">
-              <span>Sessions this week</span>
-              <strong className="num">2/3</strong>
-            </div>
-            <div className="progress" role="progressbar" aria-label="Sessions this week" aria-valuemin={0} aria-valuemax={3} aria-valuenow={2}>
-              <span style={{ width: '66%' }} />
-            </div>
-          </div>
-          <a className="hero-btn" href="#/clubs" aria-label="Find your next session">
-            <Icon name="arrowRight" size={20} strokeWidth={2.2} />
-          </a>
-        </div>
-      </section>
-
-      <div className="cats" role="group" aria-label="Browse clubs by category">
-        {categories.slice(0, 4).map((cat) => {
-          const on = state.clubFilter === cat.id;
-          return (
-            <a key={cat.id} className={on ? 'cat is-on' : 'cat'} href="#/clubs" onClick={() => set({ clubFilter: cat.id })}>
-              <Icon name={cat.icon} size={22} strokeWidth={1.8} />
-              {cat.id}
-            </a>
-          );
-        })}
-      </div>
-
-      <SectionHead title="Your clubs this week" href="#/clubs" />
-      <div className="grid-2">
+      <section className="card" aria-label="Your clubs this week">
         {myClubs.map((id) => {
           const club = clubById[id];
+          const friends = clubFriends[id] || [];
           return (
-            <a className="tile" key={id} href={`#/club/${id}`}>
-              <Cover type={club.type} />
-              <span className="tile-title">{club.shortName || club.name}</span>
-              <span className="tile-meta">{club.short}</span>
+            <a className="list-row" key={id} href={`#/club/${id}`}>
+              <Cover type={club.type} size="sm" photo={id} />
+              <span className="stack-2 grow">
+                <span className="row-title">{club.shortName || club.name}</span>
+                <span className="row-meta">{club.short}</span>
+                {friends.length > 0 && (
+                  <span className="tag tag-keen tag-inline">With {friends.join(' & ')}</span>
+                )}
+              </span>
+              <Icon name="arrowRight" size={16} strokeWidth={1.8} color="var(--subtle)" />
             </a>
           );
         })}
-      </div>
+        <a className="list-row list-row-add" href="#/clubs">
+          <span className="add-tile" aria-hidden="true">
+            <Icon name="plus" size={18} strokeWidth={2} />
+          </span>
+          <span className="stack-2 grow">
+            <span className="row-title">One more to hit your goal</span>
+            <span className="row-meta">Find a club for Wednesday or Friday</span>
+          </span>
+        </a>
+      </section>
 
-      <SectionHead title="Mentor challenge" />
-      <a className="card list-row" href="#/lesson/python">
-        <Cover type="Tech" size="sm" />
-        <div className="stack-2 grow">
-          <span className="row-title">Build a quiz in 20 lines</span>
-          <span className="row-meta">From Tendai N. · Earns the Builder badge</span>
-        </div>
-        <Icon name="arrowRight" size={20} />
+      <section className="card streak" aria-label="Weekly streak">
+        <span className="stack-2 grow">
+          <span className="row-title">3-week streak</span>
+          <span className="row-meta">Goal met in 6 of the last 8 weeks</span>
+        </span>
+        <span className="weeks" aria-hidden="true">
+          {history.map((met, i) => (
+            <span key={i} className={met ? 'week is-met' : 'week'} />
+          ))}
+          <span className="week is-current" />
+        </span>
+      </section>
+
+      <a className="promo" href="#/swipe">
+        <span className="promo-icon" aria-hidden="true">
+          <HeartFill size={20} />
+        </span>
+        <span className="stack-2 grow">
+          <span className="row-title">Swipe through clubs</span>
+          <span className="promo-sub">Heart the ones you like. Your guardian decides.</span>
+        </span>
+        <Icon name="arrowRight" size={18} strokeWidth={2} />
       </a>
+
+      <SectionHead title="From your mentor" />
+      <section className="card card-pad" aria-label="Mentor challenge">
+        <div className="row-center">
+          <a href="#/mentor/profile" className="row-center" aria-label={`${mentor.name}'s profile`}>
+            <MentorAvatar size="sm" />
+            <span className="row-meta">{mentor.name} set you a challenge</span>
+          </a>
+        </div>
+        <p className="panel-title">Build a quiz in 20 lines of Python</p>
+        <p className="body-muted">Watch the 6 minute lesson, then show your quiz at Junior Coders. {mentor.first} confirms it and you earn the Builder badge.</p>
+        <a className="btn btn-primary btn-sm" href="#/lesson/python">
+          Start lesson
+        </a>
+      </section>
+
+      <SectionHead title="Browse" />
+      <div className="cat-grid">
+        {categories.map((cat) => (
+          <a key={cat.id} className="cat" href="#/clubs" onClick={() => set({ clubFilter: cat.id })}>
+            <Cover type={cat.id} size="sm" />
+            <span>{cat.id}</span>
+          </a>
+        ))}
+      </div>
     </main>
   );
 }

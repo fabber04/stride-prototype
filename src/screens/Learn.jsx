@@ -1,62 +1,170 @@
 import { Icon, PlayFill } from '../icons.jsx';
 import Cover from '../components/Cover.jsx';
+import SectionHead from '../components/SectionHead.jsx';
+import Status from '../components/Status.jsx';
 import { useStore } from '../store.jsx';
-import { lessons } from '../data.js';
+import { learnFilters, lessons, record } from '../data.js';
+
+const lessonImage = (lesson) => `lessons/${lesson.id}.webp`;
 
 export default function Learn() {
-  const { state } = useStore();
+  const { state, set } = useStore();
+  const filter = state.learnFilter;
   const savedCount = lessons.filter((l) => state.saved[l.id]).length;
+  const pending = lessons.filter((l) => state.taskDone[l.id]);
+  const current = lessons.find((l) => l.watched > 0 && !state.taskDone[l.id]);
+  const visible = lessons.filter((l) =>
+    filter === 'All' ? true : filter === 'Saved' ? state.saved[l.id] : l.type === filter
+  );
+  const stepsDone = (lesson) => Object.values(state.steps[lesson.id] || {}).filter(Boolean).length;
 
   return (
     <main className="page">
-      <header className="topbar">
-        <h1 className="h1">Learn</h1>
-        <span className="pill-success">
-          <Icon name="download" size={16} strokeWidth={2.2} />
-          {savedCount} saved offline
+      <div className="toolbar-row toolbar-row-split">
+        <span className="offline-pill">
+          <Icon name="download" size={15} strokeWidth={2} />
+          {savedCount} saved, play with no data
         </span>
+      </div>
+
+      <header className="title-block">
+        <h1 className="h1">Learn</h1>
+        <div className="subline">
+          <span>
+            <strong>Short lessons</strong> from your mentors
+          </span>
+          <span>{lessons.length} lessons</span>
+        </div>
       </header>
 
-      <section className="hero" aria-label="Continue learning">
-        <span className="hero-eyebrow">Continue learning</span>
-        <div className="hero-row">
-          <div className="stack-12 grow">
-            <span className="hero-title">Three opening traps to know</span>
-            <div className="row-center">
-              <div className="progress grow" role="progressbar" aria-label="Lesson progress" aria-valuemin={0} aria-valuemax={8} aria-valuenow={3}>
-                <span style={{ width: '38%' }} />
-              </div>
-              <strong className="hero-small num">3/8 min</strong>
-            </div>
-          </div>
-          <a className="hero-play" href="#/lesson/chess" aria-label="Continue Three opening traps to know">
-            <PlayFill size={20} />
-          </a>
-        </div>
-      </section>
-
-      <h2 className="section-title">From your mentors and coaches</h2>
-      <div className="stack-12">
-        {lessons.map((lesson) => (
-          <a className="card list-row" key={lesson.id} href={`#/lesson/${lesson.id}`}>
-            <Cover type={lesson.type} size="sm" label />
-            <div className="stack-4 grow">
-              <span className="row-title">{lesson.title}</span>
-              <span className="row-meta">
-                {lesson.minutes} min · {lesson.by} · {lesson.size}
-              </span>
-            </div>
-            <span className="play-dot" aria-hidden="true">
-              <PlayFill size={14} />
+      {current && (
+        <a className="continue" href={`#/lesson/${current.id}`} aria-label={`Continue ${current.title}`}>
+          <Cover type={current.type} size="lg" image={lessonImage(current)} />
+          <span className="continue-body">
+            <span className="continue-eyebrow">
+              Continue · {current.watched} of {current.minutes} min
             </span>
-          </a>
+            <span className="continue-title">{current.title}</span>
+            <span className="continue-progress" aria-hidden="true">
+              <span style={{ width: `${(current.watched / current.minutes) * 100}%` }} />
+            </span>
+          </span>
+          <span className="continue-play" aria-hidden="true">
+            <PlayFill size={20} />
+          </span>
+        </a>
+      )}
+
+      <div className="chips" role="group" aria-label="Filter lessons">
+        {learnFilters.map((label) => (
+          <button
+            key={label}
+            type="button"
+            className={label === filter ? 'chip is-on' : 'chip'}
+            aria-pressed={label === filter}
+            onClick={() => set({ learnFilter: label })}
+          >
+            {label}
+          </button>
         ))}
       </div>
 
-      <div className="info">
-        <Icon name="wifiOff" size={22} />
-        <p>Saved lessons play with no data. Each one ends with a task you do offline, and your mentor confirms it.</p>
-      </div>
+      {visible.length > 0 ? (
+        <div className="lesson-grid">
+          {visible.map((lesson) => {
+            const done = stepsDone(lesson);
+            return (
+              <a className="lesson-tile" key={lesson.id} href={`#/lesson/${lesson.id}`}>
+                <Cover type={lesson.type} size="md" image={lessonImage(lesson)}>
+                  <span className="tag tag-dark lesson-time">
+                    <PlayFill size={9} /> {lesson.minutes} min
+                  </span>
+                  {state.saved[lesson.id] && (
+                    <span className="lesson-saved" aria-label="Saved offline">
+                      <Icon name="check" size={12} strokeWidth={3} />
+                    </span>
+                  )}
+                </Cover>
+                <span className="lesson-tile-body">
+                  <span className="lesson-tile-title">{lesson.title}</span>
+                  <span className="row-meta">{lesson.by}</span>
+                  {state.taskDone[lesson.id] ? (
+                    <span className="tag tag-green tag-inline">Waiting to confirm</span>
+                  ) : done > 0 ? (
+                    <span className="tag tag-blue tag-inline">
+                      {done} of {lesson.steps.length} steps
+                    </span>
+                  ) : (
+                    <span className="tag tag-blue tag-inline">
+                      <Icon name="award" size={12} strokeWidth={2.2} /> {lesson.badge}
+                    </span>
+                  )}
+                </span>
+              </a>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="body-muted empty">Nothing here yet. Save a lesson to play it with no data.</p>
+      )}
+
+      <SectionHead title="Your record" />
+      <section className="record-card" aria-label="Your record">
+        <div className="record-head">
+          <span className="stack-2">
+            <span className="record-name">Tino M.</span>
+            <span className="record-sub">Stride record · every entry confirmed by an adult</span>
+          </span>
+          <Icon name="shield" size={22} strokeWidth={1.8} />
+        </div>
+        <div className="record-stats">
+          <div>
+            <span className="record-num num">{record.sessions}</span>
+            <span className="record-sub">sessions</span>
+          </div>
+          <div>
+            <span className="record-num num">{record.badges.length}</span>
+            <span className="record-sub">badges</span>
+          </div>
+          <div>
+            <span className="record-num num">{record.weeks}</span>
+            <span className="record-sub">weeks on goal</span>
+          </div>
+        </div>
+        <ul className="record-list">
+          {pending.map((lesson) => (
+            <li key={lesson.id} className="is-pending">
+              <span className="record-badge" aria-hidden="true">
+                <Icon name="clock" size={16} strokeWidth={1.8} />
+              </span>
+              <span className="stack-2 grow">
+                <span className="row-title">{lesson.badge}</span>
+                <span className="record-sub">Waiting for {lesson.by} to confirm</span>
+              </span>
+            </li>
+          ))}
+          {record.badges.map((badge) => (
+            <li key={badge.name}>
+              <span className="record-badge" aria-hidden="true">
+                <Icon name="award" size={16} strokeWidth={1.8} />
+              </span>
+              <span className="stack-2 grow">
+                <span className="row-title">{badge.name}</span>
+                <span className="record-sub">Signed off by {badge.by}</span>
+              </span>
+              <span className="record-sub num">{badge.date}</span>
+            </li>
+          ))}
+        </ul>
+        {!state.recordShared ? (
+          <button type="button" className="btn record-btn" onClick={() => set({ recordShared: true })}>
+            <Icon name="send" size={18} strokeWidth={1.8} />
+            Share with a school or employer
+          </button>
+        ) : (
+          <Status>A read-only link was sent on WhatsApp. It shows confirmed entries only.</Status>
+        )}
+      </section>
     </main>
   );
 }

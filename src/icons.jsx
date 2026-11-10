@@ -121,6 +121,28 @@ const paths = {
     </>
   ),
   more: <path d="M5 12h.01M12 12h.01M19 12h.01" />,
+  sparkles: (
+    <>
+      <path d="M10 3l1.8 4.7L16.5 9.5l-4.7 1.8L10 16l-1.8-4.7L3.5 9.5l4.7-1.8z" />
+      <path d="M18 14l.9 2.1L21 17l-2.1.9L18 20l-.9-2.1L15 17l2.1-.9z" />
+    </>
+  ),
+  heart: <path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z" />,
+  thumbsDown: (
+    <>
+      <path d="M7 4h9.5a2 2 0 012 1.6l1.3 7a2 2 0 01-2 2.4H14l1 4a2 2 0 01-2 2.4L8 14V4z" />
+      <path d="M4 4h3v10H4z" />
+    </>
+  ),
+  x: <path d="M6 6l12 12M18 6L6 18" />,
+  sliders: <path d="M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6" />,
+  calendar: (
+    <>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
+      <path d="M8 3v4M16 3v4M3.5 10h17" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
   shield: (
     <>
       <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z" />
@@ -179,6 +201,14 @@ export function PlayFill({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M8 5.5v13l11-6.5z" />
+    </svg>
+  );
+}
+
+export function HeartFill({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 20.5s-7.5-4.6-7.5-10.5a4.3 4.3 0 017.5-2.8 4.3 4.3 0 017.5 2.8c0 5.9-7.5 10.5-7.5 10.5z" />
     </svg>
   );
 }

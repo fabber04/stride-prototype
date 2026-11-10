@@ -3,12 +3,16 @@ import { categoryIcon } from '../data.js';
 
 const iconSize = { sm: 24, md: 40, lg: 56 };
 
-// Tinted artwork for a club or lesson, coloured by its category. Works offline, unlike photos.
-// `label` shows the category name instead of the icon, as in the club list.
-export default function Cover({ type, size = 'md', label = false, children }) {
+// Artwork for a club or lesson. `photo` is a club id with a photo in public/clubs, `image` is any
+// other photo path; without either it falls back to a tint coloured by category.
+// `label` shows the category name instead of the icon.
+export default function Cover({ type, size = 'md', label = false, photo, image, children }) {
+  const src = image || (photo && `clubs/${photo}.webp`);
   return (
     <div className={`cover cover-${size}`} data-type={type}>
-      {label ? (
+      {src ? (
+        <img className="cover-img" src={src} alt="" loading="lazy" draggable="false" />
+      ) : label ? (
         <span className="cover-label">{type}</span>
       ) : (
         <Icon name={categoryIcon[type] || 'grid'} size={iconSize[size]} strokeWidth={1.8} />

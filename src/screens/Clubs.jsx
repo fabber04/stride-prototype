@@ -1,5 +1,5 @@
-import { Icon } from '../icons.jsx';
-import Cover from '../components/Cover.jsx';
+import { Icon, HeartFill } from '../icons.jsx';
+import ClubCard from '../components/ClubCard.jsx';
 import { useStore } from '../store.jsx';
 import { clubFilters, clubs } from '../data.js';
 
@@ -13,17 +13,33 @@ export default function Clubs() {
 
   return (
     <main className="page">
-      <header className="stack-6">
-        <h1 className="h1">Find a club</h1>
-        <p className="body-muted">Every club here is checked, and coaches confirm attendance.</p>
+      <div className="toolbar-row">
+        <div className="toolbar">
+          <a href="#/swipe" className="is-coral" aria-label="Swipe through clubs">
+            <HeartFill size={18} />
+          </a>
+          <a href="#/guardian" aria-label="Guardian view">
+            <Icon name="shield" size={20} strokeWidth={1.8} />
+          </a>
+        </div>
+      </div>
+
+      <header className="title-block">
+        <h1 className="h1">Discover</h1>
+        <div className="subline">
+          <span>
+            <strong>{clubs.length} checked clubs</strong> near you
+          </span>
+          <span>This term</span>
+        </div>
       </header>
 
       <label className="search">
-        <Icon name="search" size={20} />
+        <Icon name="search" size={18} strokeWidth={1.8} />
         <input
           type="search"
-          placeholder="Search clubs near you"
-          aria-label="Search clubs near you"
+          placeholder="Search clubs"
+          aria-label="Search clubs"
           value={state.clubSearch}
           onChange={(e) => set({ clubSearch: e.target.value })}
         />
@@ -43,25 +59,26 @@ export default function Clubs() {
         ))}
       </div>
 
-      <div className="stack-12">
-        {visible.map((club) => (
-          <a className="card list-row" key={club.id} href={`#/club/${club.id}`}>
-            <Cover type={club.type} size="sm" label />
-            <div className="stack-2 grow">
-              <span className="row-title">{club.name}</span>
-              <span className="row-meta">
-                {club.short} · {club.range}
-              </span>
-              <span className="verified">
-                <Icon name="check" size={14} strokeWidth={2.4} />
-                {state.requested[club.id] ? 'Request sent to your guardian' : 'Verified club'}
-              </span>
-            </div>
-            <Icon name="arrowRight" size={20} />
-          </a>
-        ))}
-        {visible.length === 0 && <p className="body-muted empty">No clubs match that search yet.</p>}
-      </div>
+      <a className="promo" href="#/swipe">
+        <span className="promo-icon" aria-hidden="true">
+          <HeartFill size={20} />
+        </span>
+        <span className="stack-2 grow">
+          <span className="row-title">Not sure what to try?</span>
+          <span className="promo-sub">Swipe through clubs. Your guardian decides.</span>
+        </span>
+        <Icon name="arrowRight" size={18} strokeWidth={2} />
+      </a>
+
+      {visible.length > 0 ? (
+        <div className="feed">
+          {visible.map((club) => (
+            <ClubCard key={club.id} club={club} requested={!!state.requested[club.id]} />
+          ))}
+        </div>
+      ) : (
+        <p className="body-muted empty">No clubs match that search yet.</p>
+      )}
     </main>
   );
 }

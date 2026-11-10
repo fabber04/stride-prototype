@@ -1,8 +1,9 @@
-import { Icon } from '../icons.jsx';
+import { Icon, HeartFill } from '../icons.jsx';
 import Cover from '../components/Cover.jsx';
 import NavBar from '../components/NavBar.jsx';
 import Status from '../components/Status.jsx';
 import { useStore } from '../store.jsx';
+import { clubChecks, clubCost, clubFriends, clubSpots } from '../data.js';
 
 const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
@@ -19,35 +20,65 @@ function nextSessions(day, count = 2) {
 export default function ClubDetail({ club }) {
   const { state, set } = useStore();
   const sent = !!state.requested[club.id];
+  const cost = clubCost[club.id];
+  const friends = clubFriends[club.id] || [];
+  const spots = clubSpots[club.id];
   const toggleRequest = () =>
     set((prev) => ({ requested: { ...prev.requested, [club.id]: !prev.requested[club.id] } }));
 
   return (
     <div className="detail">
       <main className="page">
-        <NavBar title="Club" back="#/clubs" />
-        <Cover type={club.type} size="lg" />
-        <div className="detail-meta">
-          <span className="kicker">{club.lead}</span>
-          <span className="verified">
-            <Icon name="shield" size={16} strokeWidth={2} />
+        <NavBar title={club.type} back="#/clubs" />
+        <Cover type={club.type} size="lg" photo={club.id}>
+          {spots && (
+            <span className="over over-left">
+              <span className="tag tag-warn">{spots === 1 ? '1 place left' : `${spots} places left`}</span>
+            </span>
+          )}
+        </Cover>
+
+        <div className="stack-8">
+          <span className="tag tag-blue">
+            <Icon name="shield" size={12} strokeWidth={2.4} />
             Verified
           </span>
-        </div>
-        <div className="stack-6">
           <h2 className="h1 h1-detail">{club.name}</h2>
           <p className="row-meta">
-            {club.when} · {club.ages} · {club.type}
+            {club.lead} · {club.when} · {club.ages}
           </p>
+          {friends.length > 0 && (
+            <span className="tag tag-keen tag-inline">
+              <HeartFill size={12} />
+              {friends.join(' & ')} {friends.length > 1 ? 'go' : 'goes'} here
+            </span>
+          )}
         </div>
-        <div className="stack-6">
-          <h3 className="section-title">About this club</h3>
-          <p className="body-muted">{club.about}</p>
-        </div>
+
+        <p className="body">{club.about}</p>
+
+        <section className="panel" aria-label="Checked before joining Stride">
+          <div className="panel-head">
+            <h3 className="section-title">Checked before joining Stride</h3>
+            <Icon name="shield" size={18} strokeWidth={1.6} color="var(--accent)" />
+          </div>
+          <ul className="checks">
+            {clubChecks(club).map((item) => (
+              <li key={item}>
+                <Icon name="check" size={16} strokeWidth={2} color="var(--accent)" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="cost" aria-label="Cost">
+          <span className="cost-price">{cost.price}</span>
+          <span className="row-meta">{cost.note}</span>
+        </section>
       </main>
 
       <section className="sheet-panel" aria-label="Upcoming sessions">
-        <span className="handle" aria-hidden="true" />
         <h3 className="section-title">Upcoming sessions</h3>
         {nextSessions(club.day).map((s, i) => (
           <div className="session" key={s.key}>

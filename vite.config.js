@@ -14,8 +14,8 @@ export default defineConfig({
         name: 'Stride',
         short_name: 'Stride',
         description: 'Structured, supervised activities for young people, with guardians and mentors on board.',
-        theme_color: '#4C49E6',
-        background_color: '#FFFFFF',
+        theme_color: '#F6F3ED',
+        background_color: '#F6F3ED',
         display: 'standalone',
         orientation: 'portrait',
         start_url: './',
@@ -27,8 +27,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        // Cache the app shell and the bundled fonts so it opens with no data.
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,woff}']
+        // Cache the app shell and the club photos so it opens with no data.
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,jpg}']
       }
     })
   ]
