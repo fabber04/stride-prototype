@@ -15,6 +15,12 @@ export const consentItems = [
     detail: (name) => `${name} gets a Stride account and a weekly plan. Needed to use Stride.`
   },
   {
+    id: 'childPrivacy',
+    under13: true,
+    title: 'Extra consent under 13',
+    detail: (name) => `${name} is under 13. You confirm you are their parent or legal guardian and you agree to this account on their behalf.`
+  },
+  {
     id: 'clubs',
     title: 'Ask to join clubs',
     detail: (name) => `${name} can ask to join verified clubs. You approve every request.`
@@ -38,7 +44,7 @@ export const consentItems = [
   {
     id: 'summary',
     title: 'Weekly summary on WhatsApp',
-    detail: () => 'One short message to you each week with sessions and requests.'
+    detail: () => 'A weekly summary is saved for you. WhatsApp is not connected yet.'
   }
 ];
 

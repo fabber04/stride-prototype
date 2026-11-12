@@ -1,10 +1,11 @@
 import { Icon } from '../../icons.jsx';
+import Status from '../../components/Status.jsx';
 import StepHeader from '../../components/StepHeader.jsx';
 import { categories } from '../../data.js';
 
 const goals = [1, 2, 3];
 
-export default function TeenSetup({ draft, update, onDone }) {
+export default function TeenSetup({ draft, update, onDone, problem }) {
   const toggle = (id) =>
     update({
       interests: draft.interests.includes(id) ? draft.interests.filter((i) => i !== id) : [...draft.interests, id]
@@ -65,6 +66,8 @@ export default function TeenSetup({ draft, update, onDone }) {
         />
         <span className="small muted">Other teens only see this, never your full name.</span>
       </label>
+
+      {problem && <Status icon="lock">{problem}</Status>}
 
       <div className="detail-footer onboard-footer">
         <button type="button" className="btn btn-primary" disabled={!ready} onClick={onDone}>

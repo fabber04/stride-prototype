@@ -69,13 +69,13 @@ export function GuardianAccount({ draft, update, go, back, invite }) {
 }
 
 export function VerifyGuardian({ draft, update, go, back }) {
-  // idle -> checking -> done
-  const [phase, setPhase] = useState(draft.verifiedAt ? 'done' : 'idle');
+  // idle -> checking -> done. The timer only records the method. It does not verify anyone.
+  const [phase, setPhase] = useState(draft.method ? 'done' : 'idle');
 
   useEffect(() => {
     if (phase !== 'checking') return undefined;
     const timer = setTimeout(() => {
-      update({ verifiedAt: new Date().toISOString() });
+      update({ verifiedAt: null });
       setPhase('done');
     }, 1800);
     return () => clearTimeout(timer);
@@ -110,9 +110,11 @@ export function VerifyGuardian({ draft, update, go, back }) {
           <span>Checking…</span>
         </div>
       )}
-      {phase === 'done' && <Status>Verified. Thanks, {draft.guardianName.split(' ')[0]}.</Status>}
+      {phase === 'done' && (
+        <Status>Method saved. Identity is not checked yet, {draft.guardianName.split(' ')[0]}.</Status>
+      )}
 
-      <p className="fine fine-left">Demo: no real check runs. In the live app a verification provider does this step.</p>
+      <p className="fine fine-left">No identity check runs here. A real provider has to be connected before this can be called verified.</p>
 
       <div className="detail-footer onboard-footer">
         {phase === 'done' ? (
@@ -126,7 +128,7 @@ export function VerifyGuardian({ draft, update, go, back }) {
             disabled={!draft.method || phase === 'checking'}
             onClick={() => setPhase('checking')}
           >
-            Verify me
+            Save this method
           </button>
         )}
       </div>
@@ -136,8 +138,15 @@ export function VerifyGuardian({ draft, update, go, back }) {
 
 export function ConsentStep({ draft, update, back, onAgree }) {
   const name = draft.teenName.trim() || 'Your teen';
+  const age = ageFrom(draft.dob);
   const setItem = (id, on) =>
     update({ consent: { ...draft.consent, [id]: on, ...(id === 'mentor' && !on ? { messages: false } : {}) } });
+  const items = consentItems.filter((item) => {
+    if (item.under13 && !(age !== null && age < 13)) return false;
+    if (item.needs && !draft.consent[item.needs]) return false;
+    return true;
+  });
+  const missing = items.some((item) => (item.required || item.under13) && !draft.consent[item.id]);
 
   return (
     <main className="page onboard">
@@ -146,9 +155,7 @@ export function ConsentStep({ draft, update, back, onAgree }) {
       </StepHeader>
 
       <section className="panel panel-list" aria-label="Permissions">
-        {consentItems
-          .filter((item) => !item.needs || draft.consent[item.needs])
-          .map((item) => (
+        {items.map((item) => (
             <Toggle
               key={item.id}
               title={item.title}
@@ -157,7 +164,7 @@ export function ConsentStep({ draft, update, back, onAgree }) {
               on={!!draft.consent[item.id]}
               onChange={(on) => setItem(item.id, on)}
             />
-          ))}
+        ))}
       </section>
 
       <p className="fine fine-left">
@@ -165,7 +172,7 @@ export function ConsentStep({ draft, update, back, onAgree }) {
       </p>
 
       <div className="detail-footer onboard-footer">
-        <button type="button" className="btn btn-primary" onClick={onAgree}>
+        <button type="button" className="btn btn-primary" disabled={missing} onClick={onAgree}>
           I agree to these
         </button>
       </div>
@@ -223,13 +230,13 @@ export function ChildProfile({ draft, update, back, onActivate }) {
   );
 }
 
-export function Activated({ draft, onHandOver, onDashboard }) {
+export function Activated({ draft, onDashboard, problem }) {
   const allowed = consentItems.filter((item) => draft.consent[item.id]);
 
   return (
     <main className="page onboard">
       <StepHeader title={`${draft.teenName}'s account is open`}>
-        {draft.teenName} can now use everything you allowed.
+        Their phone joins with the code on your dashboard. Identity is not checked yet.
       </StepHeader>
 
       <section className="panel" aria-label="What you allowed">
@@ -247,11 +254,10 @@ export function Activated({ draft, onHandOver, onDashboard }) {
         </ul>
       </section>
 
-      <div className="detail-footer onboard-footer stack-12">
-        <button type="button" className="btn btn-primary" onClick={onHandOver}>
-          Hand the phone to {draft.teenName}
-        </button>
-        <button type="button" className="btn btn-ghost" onClick={onDashboard}>
+      {problem && <Status icon="lock">{problem}</Status>}
+
+      <div className="detail-footer onboard-footer">
+        <button type="button" className="btn btn-primary" onClick={onDashboard}>
           Go to my dashboard
         </button>
       </div>

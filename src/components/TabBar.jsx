@@ -1,4 +1,5 @@
 import { Icon } from '../icons.jsx';
+import { useStore } from '../store.jsx';
 
 const tabs = [
   { id: 'today', label: 'Today', icon: 'home' },
@@ -9,9 +10,11 @@ const tabs = [
 ];
 
 export default function TabBar({ active }) {
+  const { session } = useStore();
+  const hidden = session?.role === 'teen' ? ['guardian'] : [];
   return (
     <nav className="tabbar" aria-label="Main">
-      {tabs.map((tab) => {
+      {tabs.filter((tab) => !hidden.includes(tab.id)).map((tab) => {
         const on = tab.id === active;
         return (
           <a

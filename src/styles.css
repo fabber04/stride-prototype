@@ -85,6 +85,17 @@ button {
   background: var(--ground);
 }
 
+.pause-banner {
+  margin: 12px 20px 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: var(--shadow);
+}
+
 .page {
   display: flex;
   flex: 1;
@@ -829,6 +840,17 @@ button {
   border-top: 1px solid var(--line);
 }
 
+.message-line {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 0;
+}
+
+.message-line + .message-line {
+  border-top: 1px solid var(--line);
+}
+
 .parents-line .chip {
   min-height: 34px;
   padding: 0 14px;
@@ -902,6 +924,22 @@ button {
   align-self: center;
   font-size: 13px;
   font-weight: 750;
+}
+
+.plan-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.plan-stack.is-single .plan-tile {
+  height: 54px;
+}
+
+.plan-stack .plan-tile {
+  height: 26px;
+  font-size: 8px;
 }
 
 .plan-tile {
@@ -2370,24 +2408,100 @@ button {
   padding-bottom: 0;
 }
 
-.onboard-hero {
+.splash {
+  gap: 28px;
+}
+
+.splash-brand {
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: center;
-  gap: 16px;
-  padding-top: 40px;
+  gap: 14px;
+  padding-bottom: 12px;
 }
 
-.onboard-mark {
+.splash-brand > * {
+  animation: splash-in 0.55s ease both;
+}
+
+.splash-brand > *:nth-child(2) { animation-delay: 0.06s; }
+.splash-brand > *:nth-child(3) { animation-delay: 0.12s; }
+.splash-brand > *:nth-child(4) { animation-delay: 0.18s; }
+
+.splash-mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 20px;
-  background: var(--coral);
-  color: var(--white);
+  width: 96px;
+  height: 96px;
+  margin-bottom: 6px;
+  border-radius: 28px;
+  background: var(--white);
+  color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.splash-word {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.splash .display {
+  font-size: 40px;
+}
+
+.splash .display em {
+  color: var(--accent);
+}
+
+.family-code {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-align: center;
+}
+
+.family-code-inline {
+  font-size: inherit;
+  letter-spacing: 0.14em;
+}
+
+.family-code-input {
+  text-align: center;
+  letter-spacing: 0.28em;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.splash-line {
+  max-width: 28ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+@keyframes splash-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-brand > * {
+    animation: none;
+  }
 }
 
 .onboard-actions {

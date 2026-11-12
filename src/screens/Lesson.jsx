@@ -8,7 +8,7 @@ import { clubById, mentor } from '../data.js';
 const initials = (name) => name.split(' ').map((p) => p[0]).join('').toUpperCase();
 
 export default function Lesson({ lesson }) {
-  const { state, set } = useStore();
+  const { state, set, session, finishTask } = useStore();
   const saved = !!state.saved[lesson.id];
   const playing = !!state.playing[lesson.id];
   const done = !!state.taskDone[lesson.id];
@@ -116,7 +116,12 @@ export default function Lesson({ lesson }) {
 
       <div className="detail-footer">
         {!done ? (
-          <button type="button" className="btn btn-primary" onClick={() => toggle('taskDone')} disabled={!ready}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => (session ? finishTask(lesson.id) : toggle('taskDone'))}
+            disabled={!ready}
+          >
             {ready ? `Send to ${lesson.by.split(' ')[0]} to confirm` : 'Tick off the steps to finish'}
           </button>
         ) : (
@@ -124,9 +129,11 @@ export default function Lesson({ lesson }) {
             <Status>
               {lesson.by} has your task now. The {lesson.badge} badge goes on your record once they confirm it.
             </Status>
-            <button type="button" className="link-btn" onClick={() => toggle('taskDone')}>
-              Undo
-            </button>
+            {!session && (
+              <button type="button" className="link-btn" onClick={() => toggle('taskDone')}>
+                Undo
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -3,11 +3,23 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // Relative base so the build works on any static host or sub-folder.
-export default defineConfig({
+// `vite build --mode native` skips the service worker. A service worker fights the
+// WebView inside the Android and iOS shells.
+export default defineConfig(({ mode }) => ({
   base: './',
+  server: {
+    proxy: {
+      '/api': 'http://127.0.0.1:8787'
+    },
+    watch: {
+      // The Android project writes local.properties while Gradle runs. Watching it
+      // makes the dev server crash with EBUSY on Windows. The database file is the same.
+      ignored: ['**/android/**', '**/ios/**', '**/server/data/**']
+    }
+  },
   plugins: [
     react(),
-    VitePWA({
+    mode !== 'native' && VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       manifest: {
@@ -31,5 +43,5 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,webp,jpg}']
       }
     })
-  ]
-});
+  ].filter(Boolean)
+}));

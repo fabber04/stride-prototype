@@ -1,10 +1,12 @@
 import { useCallback, useState } from 'react';
 import { useStore } from '../../store.jsx';
+import { explain } from '../../api.js';
 import { consentEntry, defaultConsent } from '../../onboarding.js';
 import Welcome from './Welcome.jsx';
 import TeenSetup from './TeenSetup.jsx';
-import { Adult, AgeCheck, InviteGuardian, TooYoung, Waiting } from './TeenSteps.jsx';
+import { Adult, AgeCheck, InviteGuardian, JoinFamily, TooYoung, Waiting } from './TeenSteps.jsx';
 import { Activated, ChildProfile, ConsentStep, GuardianAccount, VerifyGuardian } from './GuardianSteps.jsx';
+import ClubPick from './ClubPick.jsx';
 
 const emptyDraft = {
   dob: '',
@@ -24,12 +26,14 @@ const emptyDraft = {
 
 // Guardian-first onboarding. A teen can start, but nothing unlocks until a verified guardian consents.
 export default function Onboarding() {
-  const { state, set } = useStore();
+  const { state, set, session, startFamily, joinFamily, saveSetup, exploreDemo, leaveFamily } = useStore();
   const invite = state.pendingInvite;
   const [draft, setDraft] = useState(() =>
     invite ? { ...emptyDraft, teenName: invite.teenName, dob: invite.dob, nickname: invite.teenName } : emptyDraft
   );
   const [history, setHistory] = useState([invite ? 'waiting' : 'welcome']);
+  const [problem, setProblem] = useState('');
+  const [sending, setSending] = useState(false);
   const step = history[history.length - 1];
 
   const update = useCallback((patch) => setDraft((prev) => ({ ...prev, ...patch })), []);
@@ -39,23 +43,34 @@ export default function Onboarding() {
   };
   const back = () => setHistory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
   const restart = () => {
-    set({ pendingInvite: null });
+    leaveFamily();
     setDraft(emptyDraft);
     setHistory(['welcome']);
   };
 
-  const finish = (route) => {
-    set((prev) => ({
+  const finish = async (route) => {
+    setProblem('');
+    const patch = {
       onboarded: true,
       pendingInvite: null,
       quietHours: draft.quietHours,
+      child: 'teen',
+      requested: {},
+      decisions: {},
+      skipped: {},
+      messages: [],
+      reports: [],
+      taskDone: {},
+      recordShared: false,
+      summarySent: false,
+      parentGroups: {},
       account: {
         guardian: {
           name: draft.guardianName.trim(),
           contact: draft.guardianContact.trim(),
           relation: draft.relation,
           verifiedBy: draft.method,
-          verifiedAt: draft.verifiedAt
+          verifiedAt: null
         },
         teen: {
           name: draft.teenName.trim(),
@@ -65,9 +80,15 @@ export default function Onboarding() {
           goal: draft.goal
         }
       },
-      consent: prev.consent ?? draft.consent
-    }));
-    window.location.hash = route;
+      consent: state.consent ?? draft.consent,
+      consentLog: state.consentLog
+    };
+    try {
+      await saveSetup(patch);
+      window.location.hash = route;
+    } catch (error) {
+      setProblem(explain(error));
+    }
   };
 
   const props = { draft, update, go, back };
@@ -83,22 +104,68 @@ export default function Onboarding() {
       return (
         <InviteGuardian
           {...props}
-          onSend={() => {
-            set({
-              pendingInvite: {
-                teenName: draft.teenName.trim(),
-                dob: draft.dob,
-                contact: draft.inviteContact.trim(),
-                sentAt: new Date().toISOString()
+          busy={sending}
+          error={problem}
+          onSend={async () => {
+            setProblem('');
+            setSending(true);
+            try {
+              await startFamily('teen', {
+                pendingInvite: {
+                  teenName: draft.teenName.trim(),
+                  dob: draft.dob,
+                  contact: draft.inviteContact.trim(),
+                  sentAt: new Date().toISOString()
+                },
+                quietHours: draft.quietHours
+              });
+              update({ nickname: draft.teenName.trim() });
+              setHistory(['waiting']);
+            } catch (error) {
+              setProblem(explain(error));
+            } finally {
+              setSending(false);
+            }
+          }}
+        />
+      );
+    case 'join':
+      return (
+        <JoinFamily
+          back={back}
+          onJoin={async (code) => {
+            const joined = await joinFamily(code);
+            if (joined.scope === 'org') return;
+            if (joined.role === 'leader') {
+              window.location.hash = '#/today';
+              return;
+            }
+            if (joined.role === 'guardian' && !joined.state.onboarded) {
+              const nextInvite = joined.state.pendingInvite;
+              if (nextInvite) {
+                setDraft((prev) => ({
+                  ...prev,
+                  teenName: nextInvite.teenName,
+                  dob: nextInvite.dob,
+                  nickname: nextInvite.teenName
+                }));
               }
-            });
-            update({ nickname: draft.teenName.trim() });
-            setHistory(['waiting']);
+              setHistory(['account']);
+              return;
+            }
+            window.location.hash = joined.role === 'guardian' ? '#/guardian' : '#/today';
           }}
         />
       );
     case 'waiting':
-      return <Waiting invite={invite} onOpenInvite={() => go('account')} onCancel={restart} />;
+      return (
+        <Waiting
+          invite={invite}
+          code={session?.invites?.guardian?.code}
+          expiresAt={session?.invites?.guardian?.expiresAt}
+          onCancel={restart}
+        />
+      );
     case 'account':
       return <GuardianAccount {...props} invite={invite} />;
     case 'verify':
@@ -120,18 +187,13 @@ export default function Onboarding() {
       return <ChildProfile {...props} onActivate={() => setHistory(['activated'])} />;
     case 'activated':
       return (
-        <Activated
-          draft={draft}
-          onHandOver={() => {
-            if (!draft.nickname) update({ nickname: draft.teenName.trim() });
-            go('teenSetup');
-          }}
-          onDashboard={() => finish('#/guardian')}
-        />
+        <Activated draft={draft} problem={problem} onDashboard={() => finish('#/guardian')} />
       );
+    case 'club':
+      return <ClubPick back={back} />;
     case 'teenSetup':
-      return <TeenSetup draft={draft} update={update} onDone={() => finish('#/today')} />;
+      return <TeenSetup draft={draft} update={update} problem={problem} onDone={() => finish('#/today')} />;
     default:
-      return <Welcome go={go} onSkip={() => set({ onboarded: true })} />;
+      return <Welcome go={go} onSkip={exploreDemo} />;
   }
 }

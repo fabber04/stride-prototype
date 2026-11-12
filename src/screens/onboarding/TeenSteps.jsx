@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Icon } from '../../icons.jsx';
 import StepHeader from '../../components/StepHeader.jsx';
 import Status from '../../components/Status.jsx';
-import { MAX_AGE, MIN_AGE, ageBand, ageFrom } from '../../onboarding.js';
+import { explain } from '../../api.js';
+import { MAX_AGE, MIN_AGE, ageBand, ageFrom, formatWhen } from '../../onboarding.js';
 
 export function AgeCheck({ draft, update, go, back }) {
   const band = ageBand(ageFrom(draft.dob));
@@ -72,7 +74,7 @@ export function Adult({ back, go }) {
   );
 }
 
-export function InviteGuardian({ draft, update, back, onSend }) {
+export function InviteGuardian({ draft, update, back, onSend, busy, error }) {
   const ready = draft.teenName.trim() && draft.inviteContact.trim();
 
   return (
@@ -108,8 +110,55 @@ export function InviteGuardian({ draft, update, back, onSend }) {
       </section>
 
       <div className="detail-footer onboard-footer">
-        <button type="button" className="btn btn-primary" disabled={!ready} onClick={onSend}>
-          Send the link
+        {error && <Status icon="lock">{error}</Status>}
+        <button type="button" className="btn btn-primary" disabled={!ready || busy} onClick={onSend}>
+          {busy ? 'Saving…' : 'Send the link'}
+        </button>
+      </div>
+    </main>
+  );
+}
+
+export function JoinFamily({ back, onJoin }) {
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const ready = code.trim().length >= 6;
+
+  const submit = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      await onJoin(code.trim());
+    } catch (error) {
+      setError(explain(error));
+      setBusy(false);
+    }
+  };
+
+  return (
+    <main className="page onboard">
+      <StepHeader onBack={back} title="Enter the code">
+        The other phone shows a six-character code. It opens one role, once. A club staff code works here too.
+      </StepHeader>
+
+      <label className="stack-8">
+        <span className="field-label">Family code</span>
+        <input
+          className="input family-code-input"
+          autoCapitalize="characters"
+          autoComplete="off"
+          maxLength={6}
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+        />
+      </label>
+
+      {error && <Status icon="lock">{error}</Status>}
+
+      <div className="detail-footer onboard-footer">
+        <button type="button" className="btn btn-primary" disabled={!ready || busy} onClick={submit}>
+          {busy ? 'Opening…' : 'Continue'}
         </button>
       </div>
     </main>
@@ -122,7 +171,7 @@ const locked = [
   { icon: 'award', label: 'Earn badges and keep a record' }
 ];
 
-export function Waiting({ invite, onOpenInvite, onCancel }) {
+export function Waiting({ invite, code, expiresAt, onCancel }) {
   return (
     <main className="page onboard">
       <StepHeader title={`Nearly there, ${invite.teenName}`}>
@@ -130,6 +179,14 @@ export function Waiting({ invite, onOpenInvite, onCancel }) {
       </StepHeader>
 
       <Status icon="send">Link sent. You can remind them yourself too.</Status>
+
+      {code && (
+        <section className="panel stack-8" aria-label="Family code">
+          <p className="body">On their phone, choose “I have a family code” and enter this code. It works once.</p>
+          <p className="family-code">{code}</p>
+          {expiresAt && <p className="row-meta">Use it before {formatWhen(expiresAt)}.</p>}
+        </section>
+      )}
 
       <section className="panel panel-list" aria-label="Unlocks after approval">
         {locked.map((item) => (
@@ -143,10 +200,7 @@ export function Waiting({ invite, onOpenInvite, onCancel }) {
         ))}
       </section>
 
-      <div className="detail-footer onboard-footer stack-12">
-        <button type="button" className="btn btn-primary" onClick={onOpenInvite}>
-          Open the guardian's link (demo)
-        </button>
+      <div className="detail-footer onboard-footer">
         <button type="button" className="link-btn" onClick={onCancel}>
           Wrong number? Start again
         </button>

@@ -2,9 +2,13 @@ import { useState } from 'react';
 import { Icon } from '../icons.jsx';
 import NavBar from '../components/NavBar.jsx';
 import { mentor as matchedMentor } from '../data.js';
+import { useStore } from '../store.jsx';
+import { isDemo } from '../teen.js';
 
 export default function MentorProfile({ person = matchedMentor }) {
   const [failed, setFailed] = useState(false);
+  const { state } = useStore();
+  const sample = isDemo(state);
   const mentor = person;
 
   return (
@@ -21,16 +25,18 @@ export default function MentorProfile({ person = matchedMentor }) {
         )}
         <span className="mentor-badge">
           <Icon name="shield" size={14} strokeWidth={2.4} />
-          {mentor.badge}
+          {sample ? mentor.badge : 'Not checked for this family'}
         </span>
       </section>
 
       <div className="stack-6 center">
-        <h1 className="h1 h1-profile name-verified">
+        <h1 className={sample ? 'h1 h1-profile name-verified' : 'h1 h1-profile'}>
           {mentor.name}
-          <span className="verified-tick" aria-label="Verified">
-            <Icon name="check" size={13} strokeWidth={3.4} />
-          </span>
+          {sample && (
+            <span className="verified-tick" aria-label="Sample verified tick">
+              <Icon name="check" size={13} strokeWidth={3.4} />
+            </span>
+          )}
         </h1>
         <span className="row-meta">
           {mentor.role} · {mentor.since}
@@ -68,20 +74,24 @@ export default function MentorProfile({ person = matchedMentor }) {
         <span className="parent-note-by">{mentor.name}</span>
       </section>
 
-      <section className="panel" aria-label="Checked before joining Stride">
-        <div className="panel-head">
-          <h2 className="section-title">Checked before joining Stride</h2>
-          <Icon name="shield" size={18} strokeWidth={1.8} color="var(--accent)" />
-        </div>
-        <ul className="checks">
-          {mentor.checks.map((item) => (
-            <li key={item}>
-              <Icon name="check" size={16} strokeWidth={2} color="var(--accent)" />
-              {item}
-            </li>
-          ))}
-        </ul>
-      </section>
+      {sample ? (
+        <section className="panel" aria-label="Checked before joining Stride">
+          <div className="panel-head">
+            <h2 className="section-title">Checked before joining Stride</h2>
+            <Icon name="shield" size={18} strokeWidth={1.8} color="var(--accent)" />
+          </div>
+          <ul className="checks">
+            {mentor.checks.map((item) => (
+              <li key={item}>
+                <Icon name="check" size={16} strokeWidth={2} color="var(--accent)" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        <p className="fine fine-left">This profile is sample data. Nobody has been checked for this family.</p>
+      )}
 
       <div className="callout">
         <Icon name="eye" size={20} strokeWidth={1.6} />

@@ -1,0 +1,16 @@
+{
+  "appId": "app.stride.prototype",
+  "appName": "Stride",
+  "webDir": "dist",
+  "backgroundColor": "#F6F3ED",
+  "android": {
+    "backgroundColor": "#F6F3ED"
+  },
+  "ios": {
+    "backgroundColor": "#F6F3ED",
+    "contentInset": "automatic"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,9 +1,13 @@
 import { Icon, HeartFill } from '../icons.jsx';
 import Cover from './Cover.jsx';
 import { clubCost, clubFriends, clubSpots } from '../data.js';
+import { useStore } from '../store.jsx';
+import { isDemo } from '../teen.js';
 
 // Photo-led card for the Discover feed: artwork with status pills, then the details.
 export default function ClubCard({ club, requested }) {
+  const { state } = useStore();
+  const sample = isDemo(state);
   const friends = clubFriends[club.id] || [];
   const spots = clubSpots[club.id];
   const cost = clubCost[club.id];
@@ -19,7 +23,7 @@ export default function ClubCard({ club, requested }) {
       <span className="club-card-body">
         <span className="tag tag-blue">
           <Icon name="shield" size={12} strokeWidth={2.4} />
-          Verified
+          {sample ? 'Verified' : 'Sample club'}
         </span>
         <span className="club-card-title">{club.name}</span>
         <span className="row-meta">{club.lead.replace(' · ', ' ')}</span>

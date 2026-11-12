@@ -5,7 +5,8 @@ import SectionHead from '../components/SectionHead.jsx';
 import Status from '../components/Status.jsx';
 import Toggle from '../components/Toggle.jsx';
 import { useStore } from '../store.jsx';
-import { consentEntry, consentItems, defaultConsent, formatWhen, verifyMethods } from '../onboarding.js';
+import { explain } from '../api.js';
+import { ageFrom, consentEntry, consentItems, defaultConsent, formatWhen, verifyMethods } from '../onboarding.js';
 
 function downloadJson(filename, data) {
   const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
@@ -17,22 +18,35 @@ function downloadJson(filename, data) {
 }
 
 export default function GuardianControls() {
-  const { state, set, reset } = useStore();
+  const { state, set, reset, session, updateSettings } = useStore();
   const [deleting, setDeleting] = useState(false);
+  const [notice, setNotice] = useState('');
   const teen = state.account?.teen.name || 'Tino';
   const guardian = state.account?.guardian;
   const consent = state.consent || defaultConsent;
   const method = verifyMethods.find((m) => m.id === guardian?.verifiedBy);
+  const age = ageFrom(state.account?.teen?.dob);
+
+  const save = async (patch, local) => {
+    if (!session) {
+      set(local || patch);
+      return;
+    }
+    try {
+      await updateSettings(patch);
+    } catch (error) {
+      setNotice(explain(error));
+    }
+  };
 
   const setItem = (item, on) => {
     const next = { ...consent, [item.id]: on, ...(item.id === 'mentor' && !on ? { messages: false } : {}) };
-    set((prev) => ({
-      consent: next,
-      consentLog: [
-        ...prev.consentLog,
-        consentEntry(guardian?.name || 'Guardian', next, `${on ? 'Turned on' : 'Turned off'}: ${item.title}`)
-      ]
-    }));
+    const note = consentEntry(guardian?.name || 'Guardian', next, `${on ? 'Turned on' : 'Turned off'}: ${item.title}`);
+    if (!session) {
+      set((prev) => ({ consent: next, consentLog: [...prev.consentLog, note] }));
+      return;
+    }
+    save({ consent: next, consentNote: note });
   };
 
   const download = () =>
@@ -42,7 +56,15 @@ export default function GuardianControls() {
       consent,
       consentLog: state.consentLog,
       paused: state.paused,
-      quietHours: state.quietHours
+      quietHours: state.quietHours,
+      requested: state.requested,
+      decisions: state.decisions,
+      messages: state.messages,
+      reports: state.reports,
+      taskDone: state.taskDone,
+      recordShared: state.recordShared,
+      summarySent: state.summarySent,
+      parentGroups: state.parentGroups
     });
 
   const deleteAccount = () => {
@@ -67,7 +89,7 @@ export default function GuardianControls() {
           {guardian?.verifiedAt && (
             <span className="tag tag-blue">
               <Icon name="shield" size={12} strokeWidth={2.4} />
-              Verified
+              Identity checked
             </span>
           )}
         </div>
@@ -78,15 +100,16 @@ export default function GuardianControls() {
           title={`Pause ${teen}'s account`}
           detail="Stops club requests, lessons and mentor messages until you turn it back on."
           on={state.paused}
-          onChange={(on) => set({ paused: on })}
+          onChange={(on) => save({ paused: on }, { paused: on })}
         />
       </section>
       {state.paused && <Status icon="lock">Paused. {teen} sees a message that you paused the account.</Status>}
 
       <SectionHead title="What they can use" />
       <section className="panel panel-list" aria-label="Permissions">
+        {notice && <Status icon="lock">{notice}</Status>}
         {consentItems
-          .filter((item) => !item.needs || consent[item.needs])
+          .filter((item) => (!item.needs || consent[item.needs]) && (!item.under13 || (age !== null && age < 13)))
           .map((item) => (
             <Toggle
               key={item.id}
@@ -106,7 +129,7 @@ export default function GuardianControls() {
           title="Quiet hours"
           detail="No notifications from 9 pm to 7 am."
           on={state.quietHours}
-          onChange={(on) => set({ quietHours: on })}
+          onChange={(on) => save({ quietHours: on }, { quietHours: on })}
         />
         <Toggle title="Club requests need my approval" detail="Always on for teen accounts." on required />
       </section>
@@ -131,11 +154,28 @@ export default function GuardianControls() {
           ))
         )}
       </section>
-      {method && guardian?.verifiedAt && (
+      {method && (
         <p className="fine fine-left">
-          Identity checked by {method.title.toLowerCase()} on {formatWhen(guardian.verifiedAt)}.
+          {guardian?.verifiedAt
+            ? `Identity checked by ${method.title.toLowerCase()} on ${formatWhen(guardian.verifiedAt)}.`
+            : `Identity is not checked yet. You chose ${method.title.toLowerCase()} for when a real check is connected.`}
         </p>
       )}
+
+      <SectionHead title="Privacy" />
+      <section className="panel card-pad" aria-label="Privacy">
+        <p className="body">
+          {session
+            ? `${teen}'s account, consent, club requests, messages and reports are stored in the Stride database. Each phone joins with its own code, and that code works once.`
+            : `This device keeps ${teen}'s account, your consent choices, club requests, mentor messages and reports.`}{' '}
+          You can read every message. A message that asks to leave Stride, share a number, keep a secret, or meet
+          outside a club is held until you allow it.
+        </p>
+        <p className="body">
+          Identity is not checked in this build. A launch still needs a real identity provider, a server,
+          and each mentor's permission before their name and photo are used.
+        </p>
+      </section>
 
       <SectionHead title="Data" />
       <button type="button" className="btn btn-ghost" onClick={download}>

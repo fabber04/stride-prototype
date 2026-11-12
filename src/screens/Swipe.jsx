@@ -1,29 +1,62 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon, HeartFill } from '../icons.jsx';
 import Cover from '../components/Cover.jsx';
 import { useStore } from '../store.jsx';
-import { clubFriends, clubs, myClubs } from '../data.js';
+import { clubFriends, clubs } from '../data.js';
+import { explain } from '../api.js';
+import { consentOf, joinedClubIds, requestBlock, teenProfile } from '../teen.js';
 
 const THRESHOLD = 90;
 
 // Teen-facing swipe deck. A heart only asks the guardian; nothing is booked from here.
 export default function Swipe() {
-  const { state, set } = useStore();
+  const { state, set, session, requestClub } = useStore();
   const [dx, setDx] = useState(0);
+  const [blocked, setBlocked] = useState('');
   const start = useRef(null);
+  const teen = teenProfile(state);
+  const summaryOn = consentOf(state).summary !== false;
 
-  const deck = clubs.filter((c) => !myClubs.includes(c.id));
+  const deck = clubs.filter((c) => !joinedClubIds(state).includes(c.id));
   const queue = deck.filter((c) => !state.requested[c.id] && !state.skipped[c.id]);
   const club = queue[0];
+
+  useEffect(() => {
+    setBlocked('');
+  }, [club?.id]);
   const asked = deck.filter((c) => state.requested[c.id]).length;
   const seen = deck.length - queue.length;
 
-  const decide = (like) => {
-    set((prev) =>
-      like
-        ? { requested: { ...prev.requested, [club.id]: true } }
-        : { skipped: { ...prev.skipped, [club.id]: true } }
-    );
+  const decide = async (like) => {
+    if (like && session?.role === 'guardian') {
+      setBlocked("Club requests are sent from the teen's phone.");
+      setDx(0);
+      return;
+    }
+    if (like) {
+      const reason = requestBlock(state, club);
+      if (reason) {
+        setBlocked(reason);
+        setDx(0);
+        return;
+      }
+    }
+    setBlocked('');
+    if (like && session) {
+      try {
+        await requestClub(club.id);
+      } catch (error) {
+        setBlocked(explain(error, club));
+        setDx(0);
+        return;
+      }
+    } else {
+      set((prev) =>
+        like
+          ? { requested: { ...prev.requested, [club.id]: true } }
+          : { skipped: { ...prev.skipped, [club.id]: true } }
+      );
+    }
     setDx(0);
   };
 
@@ -50,8 +83,8 @@ export default function Swipe() {
           <Icon name="x" size={20} strokeWidth={2} />
         </a>
         <span className="swipe-who">
-          <span className="swipe-avatar" aria-hidden="true">T</span>
-          Tino
+          <span className="swipe-avatar" aria-hidden="true">{teen.nickname.slice(0, 1).toUpperCase()}</span>
+          {teen.nickname}
         </span>
         <span className="swipe-count" aria-label={`${asked} clubs asked about`}>
           <HeartFill size={16} /> {asked}
@@ -98,13 +131,15 @@ export default function Swipe() {
               <HeartFill size={28} />
             </button>
           </div>
-          <p className="swipe-note">No booking. A heart asks your guardian.</p>
+          <p className="swipe-note">
+            {blocked || (summaryOn ? 'No booking. A heart asks your guardian.' : 'No booking. A heart asks your guardian in the app.')}
+          </p>
         </>
       ) : (
         <div className="swipe-done">
           <h1 className="swipe-title">That's every club for now</h1>
           <p className="body-muted">
-            You asked about {asked} {asked === 1 ? 'club' : 'clubs'}. Your guardian gets each request in the app and on WhatsApp.
+            You asked about {asked} {asked === 1 ? 'club' : 'clubs'}. Your guardian gets each request in the app{summaryOn ? ' and on WhatsApp' : ''}.
           </p>
           <a className="btn btn-primary" href="#/clubs">
             Back to Discover

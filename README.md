@@ -13,6 +13,18 @@ npm run dev
 
 Vite prints a local link and a network link. Open the network link on your phone (same Wi-Fi) to see it at real size.
 
+## Shared family database
+
+Skip-and-explore stays on this phone. A real signup is stored in SQLite so a second phone can open the same teen.
+
+```bash
+npm run server
+```
+
+Leave that running, then `npm run dev` in another terminal. A teen signup shows a one-time guardian code. On the other phone, choose "I have a family code" and enter it. That phone can approve, pause, and release held messages. The teen phone can ask, message, and report. A club leader uses a separate code after a guardian approves.
+
+The database file is `server/data/stride.db`. Identity checks, WhatsApp, and the school link are not connected, and the app does not call them done.
+
 ## Build and share it
 
 ```bash
@@ -23,6 +35,24 @@ npm run preview
 The `dist` folder is a plain static site. Drop it on Netlify, Vercel, GitHub Pages or Firebase Hosting and send the link. It uses relative paths and hash routing (`#/clubs`), so it works from any folder or host with no server settings.
 
 On a phone, open the link and choose "Add to home screen". The app shell and fonts are cached, so it opens offline once it has loaded one time on a connection.
+
+## Android and iOS
+
+The same screens also sit inside a native shell (Capacitor), so they can be installed from a store later. The web build is copied into the app. There is no second codebase.
+
+```bash
+npm run cap:android
+```
+
+That builds the native bundle, copies it in, and opens the `android` folder in Android Studio. Run it on a phone or an emulator from there. Android Studio and a JDK are required. They are not part of this project.
+
+```bash
+npm run cap:ios
+```
+
+That opens the Xcode project. iOS can only be built on a Mac.
+
+`npm run cap:sync` rebuilds and copies the web app into both projects without opening an IDE. The native build skips the service worker, because the WebView already has the files on the device.
 
 ## The screens
 

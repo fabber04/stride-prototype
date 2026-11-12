@@ -5,10 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
+    "server": "node server/index.js",
     "build": "vite build",
-    "preview": "vite preview --host"
+    "build:native": "vite build --mode native",
+    "preview": "vite preview --host",
+    "cap:sync": "npm run build:native && cap sync",
+    "cap:android": "npm run build:native && cap sync android && cap open android",
+    "cap:ios": "npm run build:native && cap sync ios && cap open ios"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/ios": "^8.6.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

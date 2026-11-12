@@ -2,13 +2,17 @@ import { Icon, HeartFill } from '../icons.jsx';
 import ClubCard from '../components/ClubCard.jsx';
 import { useStore } from '../store.jsx';
 import { clubFilters, clubs } from '../data.js';
+import { preferInterests, teenProfile } from '../teen.js';
 
 export default function Clubs() {
   const { state, set } = useStore();
   const filter = state.clubFilter;
   const query = state.clubSearch.trim().toLowerCase();
-  const visible = clubs.filter(
-    (club) => (filter === 'All' || club.type === filter) && (!query || club.name.toLowerCase().includes(query))
+  const visible = preferInterests(
+    clubs.filter(
+      (club) => (filter === 'All' || club.type === filter) && (!query || club.name.toLowerCase().includes(query))
+    ),
+    teenProfile(state).interests
   );
 
   return (
