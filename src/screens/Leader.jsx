@@ -38,6 +38,10 @@ export default function Leader() {
 
   return (
     <main className="page">
+      <button type="button" className="back-btn" onClick={leaveFamily}>
+        <Icon name="back" size={18} />
+        Back
+      </button>
       <header className="title-block">
         <h1 className="h1">{club.name}</h1>
         <p className="row-meta">Leader code for {teen.name}. You can accept them and confirm a session. You cannot read their messages or reports.</p>

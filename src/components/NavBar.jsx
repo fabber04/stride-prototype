@@ -4,13 +4,12 @@ import { Icon } from '../icons.jsx';
 export default function NavBar({ title, back }) {
   return (
     <header className="navbar">
-      <a className="icon-btn" href={back} aria-label="Back">
-        <Icon name="back" />
+      <a className="back-btn" href={back}>
+        <Icon name="back" size={18} />
+        Back
       </a>
       <h1 className="navbar-title">{title}</h1>
-      <span className="icon-btn" aria-hidden="true">
-        <Icon name="more" strokeWidth={3} />
-      </span>
+      <span className="back-spacer" aria-hidden="true" />
     </header>
   );
 }

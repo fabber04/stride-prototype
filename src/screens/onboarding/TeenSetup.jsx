@@ -5,7 +5,7 @@ import { categories } from '../../data.js';
 
 const goals = [1, 2, 3];
 
-export default function TeenSetup({ draft, update, onDone, problem }) {
+export default function TeenSetup({ draft, update, onDone, onBack, problem }) {
   const toggle = (id) =>
     update({
       interests: draft.interests.includes(id) ? draft.interests.filter((i) => i !== id) : [...draft.interests, id]
@@ -14,7 +14,7 @@ export default function TeenSetup({ draft, update, onDone, problem }) {
 
   return (
     <main className="page onboard">
-      <StepHeader kicker={`Hi ${draft.teenName}`} title="Make it yours">
+      <StepHeader onBack={onBack} kicker={`Hi ${draft.teenName}`} title="Make it yours">
         Your guardian set things up. Now pick what you're into.
       </StepHeader>
 

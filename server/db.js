@@ -512,7 +512,7 @@ export function createFamily(db, { role, state, timezone }) {
   }
 }
 
-export function joinFamily(db, code, ip) {
+export function joinFamily(db, code, ip, door = 'family') {
   const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
   const failures = db.prepare('SELECT COUNT(*) AS n FROM join_attempts WHERE ip = ? AND at > ? AND ok = 0').get(ip || 'local', since);
   if (failures.n >= 8) return { error: 'rate_limited' };
@@ -521,9 +521,13 @@ export function joinFamily(db, code, ip) {
   const orgInvite = db.prepare('SELECT * FROM org_invites WHERE code_hash = ?').get(hashCode(code));
   const familyFresh = invite && invite.expires_at > now;
   const orgFresh = orgInvite && orgInvite.expires_at > now;
-  db.prepare('INSERT INTO join_attempts (ip, at, ok) VALUES (?, ?, ?)').run(ip || 'local', new Date().toISOString(), familyFresh || orgFresh ? 1 : 0);
-  if (familyFresh) return acceptFamilyInvite(db, invite);
-  if (orgFresh) return acceptOrgInvite(db, orgInvite);
+  const wantStaff = door === 'staff';
+  const accepted = wantStaff ? orgFresh : familyFresh;
+  const wrongDoor = wantStaff ? familyFresh : orgFresh;
+  db.prepare('INSERT INTO join_attempts (ip, at, ok) VALUES (?, ?, ?)').run(ip || 'local', new Date().toISOString(), accepted ? 1 : 0);
+  if (accepted && wantStaff) return acceptOrgInvite(db, orgInvite);
+  if (accepted) return acceptFamilyInvite(db, invite);
+  if (wrongDoor) return { error: wantStaff ? 'family_code' : 'staff_code' };
   return { error: invite || orgInvite ? 'expired' : 'unknown' };
 }
 

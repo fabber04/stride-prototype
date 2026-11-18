@@ -119,7 +119,7 @@ export function InviteGuardian({ draft, update, back, onSend, busy, error }) {
   );
 }
 
-export function JoinFamily({ back, onJoin }) {
+export function JoinFamily({ back, onJoin, staff = false }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -138,12 +138,14 @@ export function JoinFamily({ back, onJoin }) {
 
   return (
     <main className="page onboard">
-      <StepHeader onBack={back} title="Enter the code">
-        The other phone shows a six-character code. It opens one role, once. A club staff code works here too.
+      <StepHeader onBack={back} title={staff ? 'Enter the staff code' : 'Enter the family code'}>
+        {staff
+          ? 'The club owner shows a six-character code. It opens one staff role, once.'
+          : 'The other phone in your family shows a six-character code. It opens one role, once.'}
       </StepHeader>
 
       <label className="stack-8">
-        <span className="field-label">Family code</span>
+        <span className="field-label">{staff ? 'Staff code' : 'Family code'}</span>
         <input
           className="input family-code-input"
           autoCapitalize="characters"
@@ -171,10 +173,10 @@ const locked = [
   { icon: 'award', label: 'Earn badges and keep a record' }
 ];
 
-export function Waiting({ invite, code, expiresAt, onCancel }) {
+export function Waiting({ invite, code, expiresAt, onCancel, back }) {
   return (
     <main className="page onboard">
-      <StepHeader title={`Nearly there, ${invite.teenName}`}>
+      <StepHeader onBack={back} title={`Nearly there, ${invite.teenName}`}>
         We sent a link to {invite.contact}. Your account opens as soon as they approve it.
       </StepHeader>
 

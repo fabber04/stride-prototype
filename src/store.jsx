@@ -174,7 +174,7 @@ export function StoreProvider({ children }) {
   );
 
   const joinFamily = useCallback(
-    async (code) => keep(await api('/api/families/join', { method: 'POST', body: { code } })),
+    async (code, door = 'family') => keep(await api('/api/families/join', { method: 'POST', body: { code, door } })),
     [keep]
   );
 

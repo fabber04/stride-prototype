@@ -107,7 +107,7 @@ const server = createServer(async (req, res) => {
 
     if (req.method === 'POST' && url.pathname === '/api/families/join') {
       const body = await readBody(req);
-      const joined = joinFamily(db, body.code, clientIp(req));
+      const joined = joinFamily(db, body.code, clientIp(req), body.door === 'staff' ? 'staff' : 'family');
       if (joined?.scope === 'org') {
         const orgSession = familyForToken(db, joined.token);
         answer(res, { ...joined, org: readOrg(db, orgSession), revision: orgSession.revision });

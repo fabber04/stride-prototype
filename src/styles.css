@@ -1006,9 +1006,28 @@ button {
   gap: 12px;
 }
 
-.navbar .icon-btn {
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 14px 0 8px;
+  border: 0;
+  border-radius: 999px;
   background: var(--white);
   box-shadow: var(--shadow);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.back-spacer {
+  width: 78px;
+  flex: none;
 }
 
 .navbar-title {
@@ -2408,55 +2427,308 @@ button {
   padding-bottom: 0;
 }
 
-.splash {
-  gap: 28px;
+.app:has(.splash) {
+  background: var(--white);
 }
 
-.splash-brand {
+.splash {
+  gap: 0;
+  min-height: 100dvh;
+  padding: 0;
+  background: var(--white);
+  overflow: hidden;
+}
+
+.splash-stage {
+  display: flex;
+  flex: 1 1 50%;
+  flex-direction: column;
+  min-height: 0;
+  padding: max(14px, env(safe-area-inset-top, 0px)) 18px 0;
+}
+
+.splash-card {
+  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 14px;
-  padding-bottom: 12px;
+  padding: 28px 24px 32px;
+  overflow: hidden;
+  border-radius: 40px;
+  background: var(--ink);
+  box-shadow:
+    0 4px 6px rgba(28, 28, 30, 0.04),
+    0 16px 40px rgba(28, 28, 30, 0.14),
+    0 0 0 1px rgba(28, 28, 30, 0.06);
 }
 
-.splash-brand > * {
-  animation: splash-in 0.55s ease both;
+.splash-glow {
+  position: absolute;
+  top: -20%;
+  right: -30%;
+  width: 80%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(47, 111, 222, 0.22) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-.splash-brand > *:nth-child(2) { animation-delay: 0.06s; }
-.splash-brand > *:nth-child(3) { animation-delay: 0.12s; }
-.splash-brand > *:nth-child(4) { animation-delay: 0.18s; }
+.splash-card-rule {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  pointer-events: none;
+}
+
+.splash-card-copy {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+}
+
+.splash-card-copy > * {
+  animation: splash-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.splash-card-copy > *:nth-child(2) { animation-delay: 0.12s; }
+.splash-card-copy > *:nth-child(3) { animation-delay: 0.2s; }
+.splash-card-copy > *:nth-child(4) { animation-delay: 0.28s; }
+
+.splash-logo {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 22px;
+}
+
+.splash-logo-ring {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid rgba(47, 111, 222, 0.45);
+  border-radius: 50%;
+}
 
 .splash-mark {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 96px;
-  height: 96px;
-  margin-bottom: 6px;
-  border-radius: 28px;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
   background: var(--white);
-  color: var(--accent);
-  box-shadow: var(--shadow);
+  color: var(--ink);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-.splash-word {
+.splash-script {
   margin: 0;
-  color: var(--muted);
-  font-size: 13px;
+  color: var(--accent);
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(2.2rem, 10vw, 2.75rem);
   font-weight: 700;
-  letter-spacing: 0.16em;
+  line-height: 1;
+}
+
+.splash-title {
+  margin: 0;
+  color: var(--white);
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: clamp(1.25rem, 5.8vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
-.splash .display {
-  font-size: 40px;
+.splash-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 200px;
+  margin: 16px auto 18px;
 }
 
-.splash .display em {
+.splash-dots-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.splash-dots-side,
+.splash-dots-center {
+  flex: none;
+  border-radius: 50%;
+}
+
+.splash-dots-side {
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.splash-dots-center {
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+}
+
+.splash-dots.is-light .splash-dots-line {
+  background: rgba(47, 111, 222, 0.45);
+}
+
+.splash-dots.is-light .splash-dots-side {
+  background: var(--accent);
+}
+
+.splash-dots.is-light .splash-dots-center {
+  background: var(--ink);
+}
+
+.splash-lower {
+  display: flex;
+  flex: 1 1 50%;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  padding: 22px 28px max(16px, env(safe-area-inset-bottom, 0px));
+  overflow: auto;
+  background: var(--white);
+  text-align: center;
+}
+
+.splash-lower > * {
+  animation: splash-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.splash-lower > *:nth-child(1) { animation-delay: 0.34s; }
+.splash-lower > *:nth-child(2) { animation-delay: 0.42s; }
+.splash-lower > *:nth-child(3) { animation-delay: 0.5s; }
+.splash-lower > *:nth-child(4) { animation-delay: 0.56s; }
+.splash-lower > *:nth-child(5) { animation-delay: 0.62s; }
+.splash-lower > *:nth-child(6) { animation-delay: 0.68s; }
+
+.splash-kicker {
+  margin: 0;
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.splash-tagline {
+  max-width: 16em;
+  margin: 0;
   color: var(--accent);
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: clamp(1.25rem, 5.2vw, 1.45rem);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.splash-note {
+  max-width: 28ch;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.splash-marklet {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.splash-marklet span:first-child,
+.splash-marklet span:last-child {
+  width: 18px;
+  height: 1px;
+  background: rgba(47, 111, 222, 0.4);
+}
+
+.splash-marklet span:nth-child(2) {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.splash-actions {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.splash-actions .btn,
+.splash-actions .link-btn {
+  width: 100%;
+}
+
+.splash-actions .btn-ghost {
+  border: 1.5px solid var(--ink);
+  background: var(--white);
+  box-shadow: none;
+}
+
+@media (max-height: 740px) {
+  .splash-stage {
+    flex-basis: 44%;
+  }
+
+  .splash-logo {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 12px;
+  }
+
+  .splash-script {
+    font-size: 2rem;
+  }
+
+  .splash-card {
+    padding: 20px 20px 24px;
+  }
+
+  .splash-actions .btn {
+    min-height: 46px;
+  }
+}
+
+@media (max-height: 700px) {
+  .splash-lower {
+    padding-top: 12px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .splash-dots {
+    margin: 8px auto;
+  }
+
+  .splash-note {
+    margin-top: 6px;
+  }
+
+  .splash-marklet {
+    margin-top: 8px;
+  }
+
+  .splash-actions {
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .splash-actions .link-btn {
+    min-height: 36px;
+  }
 }
 
 .family-code {
@@ -2479,14 +2751,6 @@ button {
   text-transform: uppercase;
 }
 
-.splash-line {
-  max-width: 28ch;
-  margin: 0;
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1.45;
-}
-
 @keyframes splash-in {
   from {
     opacity: 0;
@@ -2499,7 +2763,8 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .splash-brand > * {
+  .splash-card-copy > *,
+  .splash-lower > * {
     animation: none;
   }
 }

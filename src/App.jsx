@@ -30,6 +30,7 @@ function currentRoute() {
   if (name === 'mentor' && mentorById[id]) return { name: 'mentorProfile', id };
   if (name === 'ask' && mentorById[id]) return { name: 'mentor', compose: id };
   if (name === 'guardian' && id === 'controls') return { name: 'guardianControls' };
+  if (name === 'admin') return { name: 'admin' };
   return { name: tabs[name] ? name : 'today' };
 }
 
@@ -47,6 +48,11 @@ function TeenFinish() {
     <TeenSetup
       draft={draft}
       update={(patch) => setDraft((prev) => ({ ...prev, ...patch }))}
+      onBack={() => {
+        localStorage.setItem('stride-teen-setup', '1');
+        window.location.hash = '#/today';
+        window.location.reload();
+      }}
       problem={problem}
       onDone={async () => {
         try {
@@ -91,10 +97,18 @@ function Screens() {
     );
   }
 
+  if (route.name === 'admin' && !session) {
+    return (
+      <div className="app">
+        <Onboarding key="admin" start="admin" />
+      </div>
+    );
+  }
+
   if (!state.onboarded) {
     return (
       <div className="app">
-        <Onboarding />
+        <Onboarding key="family" />
       </div>
     );
   }
@@ -121,7 +135,7 @@ function Screens() {
   }
 
   const teenBlocked = session?.role === 'teen' && (route.name === 'guardian' || route.name === 'guardianControls');
-  const safeRoute = teenBlocked ? { name: 'today' } : route;
+  const safeRoute = teenBlocked || route.name === 'admin' ? { name: 'today' } : route;
 
   let screen;
   if (safeRoute.name === 'club') screen = <ClubDetail club={clubById[safeRoute.id]} />;

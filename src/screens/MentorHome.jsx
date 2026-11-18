@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Icon } from '../icons.jsx';
 import Status from '../components/Status.jsx';
 import { useStore } from '../store.jsx';
 import { explain } from '../api.js';
@@ -28,6 +29,10 @@ export default function MentorHome() {
 
   return (
     <main className="page">
+      <button type="button" className="back-btn" onClick={leaveFamily}>
+        <Icon name="back" size={18} />
+        Back
+      </button>
       <header className="title-block">
         <h1 className="h1">{org.mentorName}</h1>
         <p className="row-meta">{org.name}. You see teens this club has accepted, and only messages a guardian let through.</p>

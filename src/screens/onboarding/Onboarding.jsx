@@ -1,8 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useStore } from '../../store.jsx';
 import { explain } from '../../api.js';
 import { consentEntry, defaultConsent } from '../../onboarding.js';
-import Welcome from './Welcome.jsx';
+import Welcome, { AdminDoor } from './Welcome.jsx';
 import TeenSetup from './TeenSetup.jsx';
 import { Adult, AgeCheck, InviteGuardian, JoinFamily, TooYoung, Waiting } from './TeenSteps.jsx';
 import { Activated, ChildProfile, ConsentStep, GuardianAccount, VerifyGuardian } from './GuardianSteps.jsx';
@@ -25,23 +25,33 @@ const emptyDraft = {
 };
 
 // Guardian-first onboarding. A teen can start, but nothing unlocks until a verified guardian consents.
-export default function Onboarding() {
+export default function Onboarding({ start }) {
   const { state, set, session, startFamily, joinFamily, saveSetup, exploreDemo, leaveFamily } = useStore();
   const invite = state.pendingInvite;
   const [draft, setDraft] = useState(() =>
     invite ? { ...emptyDraft, teenName: invite.teenName, dob: invite.dob, nickname: invite.teenName } : emptyDraft
   );
-  const [history, setHistory] = useState([invite ? 'waiting' : 'welcome']);
+  const [history, setHistory] = useState([start === 'admin' ? 'admin' : invite ? 'waiting' : 'welcome']);
   const [problem, setProblem] = useState('');
   const [sending, setSending] = useState(false);
   const step = history[history.length - 1];
 
   const update = useCallback((patch) => setDraft((prev) => ({ ...prev, ...patch })), []);
   const go = (next) => {
+    window.history.pushState({ strideOnboard: true }, '');
     setHistory((prev) => [...prev, next]);
     window.scrollTo(0, 0);
   };
-  const back = () => setHistory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  const back = () => {
+    if (window.history.state?.strideOnboard) window.history.back();
+    else setHistory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  };
+
+  useEffect(() => {
+    const onPop = () => setHistory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
   const restart = () => {
     leaveFamily();
     setDraft(emptyDraft);
@@ -110,6 +120,10 @@ export default function Onboarding() {
             setProblem('');
             setSending(true);
             try {
+              if (session?.role === 'teen') {
+                go('waiting');
+                return;
+              }
               await startFamily('teen', {
                 pendingInvite: {
                   teenName: draft.teenName.trim(),
@@ -120,7 +134,7 @@ export default function Onboarding() {
                 quietHours: draft.quietHours
               });
               update({ nickname: draft.teenName.trim() });
-              setHistory(['waiting']);
+              go('waiting');
             } catch (error) {
               setProblem(explain(error));
             } finally {
@@ -134,7 +148,7 @@ export default function Onboarding() {
         <JoinFamily
           back={back}
           onJoin={async (code) => {
-            const joined = await joinFamily(code);
+            const joined = await joinFamily(code, 'family');
             if (joined.scope === 'org') return;
             if (joined.role === 'leader') {
               window.location.hash = '#/today';
@@ -164,6 +178,7 @@ export default function Onboarding() {
           code={session?.invites?.guardian?.code}
           expiresAt={session?.invites?.guardian?.expiresAt}
           onCancel={restart}
+          back={back}
         />
       );
     case 'account':
@@ -189,10 +204,23 @@ export default function Onboarding() {
       return (
         <Activated draft={draft} problem={problem} onDashboard={() => finish('#/guardian')} />
       );
+    case 'admin':
+      return <AdminDoor go={go} />;
+    case 'staff':
+      return (
+        <JoinFamily
+          staff
+          back={back}
+          onJoin={async (code) => {
+            const joined = await joinFamily(code, 'staff');
+            if (joined.scope === 'org') return;
+          }}
+        />
+      );
     case 'club':
       return <ClubPick back={back} />;
     case 'teenSetup':
-      return <TeenSetup draft={draft} update={update} problem={problem} onDone={() => finish('#/today')} />;
+      return <TeenSetup draft={draft} update={update} onBack={back} problem={problem} onDone={() => finish('#/today')} />;
     default:
       return <Welcome go={go} onSkip={exploreDemo} />;
   }

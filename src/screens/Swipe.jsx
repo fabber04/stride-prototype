@@ -79,8 +79,9 @@ export default function Swipe() {
   return (
     <div className="swipe">
       <header className="swipe-head">
-        <a className="round-btn" href="#/clubs" aria-label="Close">
-          <Icon name="x" size={20} strokeWidth={2} />
+        <a className="back-btn" href="#/clubs">
+          <Icon name="back" size={18} />
+          Back
         </a>
         <span className="swipe-who">
           <span className="swipe-avatar" aria-hidden="true">{teen.nickname.slice(0, 1).toUpperCase()}</span>
