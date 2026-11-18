@@ -6,7 +6,7 @@ import Status from '../components/Status.jsx';
 import { useStore } from '../store.jsx';
 import { clubChecks, clubCost, clubFriends, clubSpots } from '../data.js';
 import { explain } from '../api.js';
-import { consentOf, isDemo, requestBlock } from '../teen.js';
+import { isDemo, requestBlock } from '../teen.js';
 
 const weekdays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
@@ -29,7 +29,6 @@ export default function ClubDetail({ club }) {
   const friends = clubFriends[club.id] || [];
   const spots = clubSpots[club.id];
   const block = requestBlock(state, club);
-  const summaryOn = consentOf(state).summary !== false;
   const sample = isDemo(state);
   const ask = async () => {
     setProblem('');
@@ -145,11 +144,7 @@ export default function ClubDetail({ club }) {
           </div>
         )}
         {problem && <Status icon="lock">{problem}</Status>}
-        <p className="fine">
-          {summaryOn
-            ? 'Your guardian gets the request in the app. WhatsApp is not connected.'
-            : 'Your guardian gets the request in the app.'}
-        </p>
+        <p className="fine">Your guardian gets the request in the app.</p>
       </section>
     </div>
   );

@@ -84,7 +84,7 @@ export default function GuardianControls() {
               <strong>{guardian.name}</strong> · {guardian.relation}
             </span>
           ) : (
-            <span>Demo account</span>
+            <span>Sample family</span>
           )}
           {guardian?.verifiedAt && (
             <span className="tag tag-blue">
@@ -172,8 +172,7 @@ export default function GuardianControls() {
           outside a club is held until you allow it.
         </p>
         <p className="body">
-          Identity is not checked in this build. A launch still needs a real identity provider, a server,
-          and each mentor's permission before their name and photo are used.
+          Identity checks and WhatsApp are not part of this preview. Requests, consent, and messages stay in Stride.
         </p>
       </section>
 
@@ -182,9 +181,22 @@ export default function GuardianControls() {
         <Icon name="download" size={18} strokeWidth={1.8} />
         Download {teen}'s data
       </button>
-      <button type="button" className="btn btn-danger-outline" onClick={() => setDeleting(true)}>
-        Delete {teen}'s account
-      </button>
+      {session ? (
+        <button type="button" className="btn btn-danger-outline" onClick={() => setDeleting(true)}>
+          Delete {teen}'s account
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={() => {
+            reset();
+            window.location.hash = '#/';
+          }}
+        >
+          Back to the start
+        </button>
+      )}
 
       {deleting && (
         <div className="backdrop">

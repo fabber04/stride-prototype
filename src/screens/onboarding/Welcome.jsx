@@ -97,7 +97,7 @@ export default function Welcome({ go, onSkip }) {
         I have a family code
       </button>
       <button type="button" className="link-btn" onClick={onSkip}>
-        Skip and explore the demo
+        Look around
       </button>
     </SplashFrame>
   );

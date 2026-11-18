@@ -3,8 +3,12 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "dev": "vite --host",
+    "start": "node server/index.js",
     "server": "node server/index.js",
     "build": "vite build",
     "build:native": "vite build --mode native",

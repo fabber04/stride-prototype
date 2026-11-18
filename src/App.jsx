@@ -86,7 +86,11 @@ function Screens() {
   }, []);
 
   if (!ready) {
-    return <div className="app" />;
+    return (
+      <div className="app">
+        <p className="booting" role="status">Stride</p>
+      </div>
+    );
   }
 
   if (session?.scope === 'org') {

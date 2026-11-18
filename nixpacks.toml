@@ -1,0 +1,12 @@
+# Vite lives in devDependencies, so the production install must keep it for the build.
+# Node 22.13+ is required for the built-in SQLite used by the API.
+
+[variables]
+NPM_CONFIG_PRODUCTION = "false"
+NIXPACKS_NODE_VERSION = "22"
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "node server/index.js"

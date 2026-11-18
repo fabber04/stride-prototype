@@ -33,14 +33,18 @@
 
 html,
 body {
+  height: 100%;
   margin: 0;
 }
 
 body {
-  background: #e9e5dd;
+  background:
+    radial-gradient(900px 480px at 50% -10%, rgba(47, 111, 222, 0.08), transparent 60%),
+    #e6e1d8;
   color: var(--ink);
   font-family: var(--font);
   font-size: 15px;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -78,14 +82,18 @@ button {
   position: relative;
   display: flex;
   flex-direction: column;
+  width: 100%;
   max-width: 430px;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   margin: 0 auto;
+  overflow: hidden;
   background: var(--ground);
+  transform: translateZ(0);
 }
 
 .pause-banner {
+  flex: none;
   margin: 12px 20px 0;
   padding: 12px 14px;
   border-radius: 14px;
@@ -101,12 +109,16 @@ button {
   flex: 1;
   flex-direction: column;
   gap: 18px;
+  min-height: 0;
   padding: calc(14px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-left)) 32px
     max(20px, env(safe-area-inset-right));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .app:has(.tabbar) .page {
-  padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 28px;
 }
 
 .topbar {
@@ -1039,6 +1051,10 @@ button {
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .detail > .page {
@@ -1187,11 +1203,15 @@ button {
 /* Chips */
 .chips {
   display: flex;
+  flex: none;
   gap: 8px;
   margin: 0 -20px;
-  padding: 2px 20px;
+  padding: 4px 20px 10px;
   overflow-x: auto;
+  scroll-snap-type: x proximity;
   scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 36px), transparent);
 }
 
 .chips::-webkit-scrollbar {
@@ -1203,6 +1223,7 @@ button {
   flex: none;
   align-items: center;
   gap: 8px;
+  scroll-snap-align: start;
   min-height: 38px;
   padding: 0 16px;
   border: 0;
@@ -1678,6 +1699,7 @@ button {
   flex-direction: column;
   align-items: center;
   gap: 14px;
+  min-height: 0;
   padding: calc(14px + env(safe-area-inset-top, 0px)) 20px calc(20px + env(safe-area-inset-bottom, 0px));
   overflow: hidden;
   background: var(--coral);
@@ -2384,16 +2406,13 @@ button {
 
 /* Floating capsule tab bar */
 .tabbar {
-  position: fixed;
-  right: 0;
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-  left: 0;
+  position: relative;
   z-index: 10;
   display: flex;
+  flex: none;
   gap: 2px;
-  width: calc(100% - 28px);
-  max-width: 400px;
-  margin: 0 auto;
+  width: auto;
+  margin: 0 14px calc(14px + env(safe-area-inset-bottom, 0px));
   padding: 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.86);
@@ -2422,8 +2441,7 @@ button {
 
 /* Onboarding: guardian-first setup before the app opens */
 .onboard {
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100%;
   padding-bottom: 0;
 }
 
@@ -2433,17 +2451,18 @@ button {
 
 .splash {
   gap: 0;
-  min-height: 100dvh;
+  min-height: 0;
   padding: 0;
   background: var(--white);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .splash-stage {
   display: flex;
-  flex: 1 1 50%;
+  flex: 1 1 auto;
   flex-direction: column;
-  min-height: 0;
+  min-height: 168px;
   padding: max(14px, env(safe-area-inset-top, 0px)) 18px 0;
 }
 
@@ -2457,7 +2476,9 @@ button {
   padding: 28px 24px 32px;
   overflow: hidden;
   border-radius: 40px;
-  background: var(--ink);
+  background:
+    radial-gradient(120% 90% at 110% -10%, rgba(47, 111, 222, 0.42), transparent 58%),
+    var(--ink);
   box-shadow:
     0 4px 6px rgba(28, 28, 30, 0.04),
     0 16px 40px rgba(28, 28, 30, 0.14),
@@ -2465,13 +2486,7 @@ button {
 }
 
 .splash-glow {
-  position: absolute;
-  top: -20%;
-  right: -30%;
-  width: 80%;
-  height: 60%;
-  background: radial-gradient(circle, rgba(47, 111, 222, 0.22) 0%, transparent 70%);
-  pointer-events: none;
+  display: none;
 }
 
 .splash-card-rule {
@@ -2594,12 +2609,10 @@ button {
 
 .splash-lower {
   display: flex;
-  flex: 1 1 50%;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: center;
-  min-height: 0;
-  padding: 22px 28px max(16px, env(safe-area-inset-bottom, 0px));
-  overflow: auto;
+  padding: 18px 28px max(12px, env(safe-area-inset-bottom, 0px));
   background: var(--white);
   text-align: center;
 }
@@ -2940,11 +2953,131 @@ button {
   .swipe-btn,
   .swipe-progress span,
   .switch,
-  .switch-knob {
+  .switch-knob,
+  .splash-card-copy > *,
+  .splash-lower > * {
     transition: none;
+    animation: none;
   }
 
   .spinner {
     animation-duration: 2s;
   }
+}
+
+.booting {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 22px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.web {
+  height: 100%;
+  min-height: 100%;
+}
+
+.web-rail {
+  display: none;
+}
+
+@media (min-width: 760px) {
+  .app {
+    box-shadow:
+      0 0 0 1px rgba(28, 28, 30, 0.06),
+      0 24px 70px rgba(28, 28, 30, 0.14);
+  }
+}
+
+@media (min-width: 1100px) {
+  .web {
+    display: grid;
+    grid-template-columns: minmax(300px, 1fr) 430px minmax(64px, 1fr);
+    align-items: stretch;
+  }
+
+  .web-rail {
+    display: flex;
+    grid-column: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 16px;
+    max-width: 440px;
+    margin-left: auto;
+    padding: 48px 56px 48px 40px;
+  }
+
+  #root {
+    grid-column: 2;
+    min-width: 0;
+  }
+}
+
+.web-kicker {
+  margin: 0;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.web-title {
+  max-width: 11em;
+  margin: 0;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.web-lead,
+.web-points {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.web-points {
+  padding: 0;
+  list-style: none;
+}
+
+.web-points li {
+  position: relative;
+  padding-left: 16px;
+}
+
+.web-points li + li {
+  margin-top: 8px;
+}
+
+.web-points li::before {
+  content: '';
+  position: absolute;
+  top: 0.55em;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.web-rail-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 8px;
+  border-bottom: 1px solid var(--ink);
+  color: var(--ink);
+  font-weight: 650;
 }

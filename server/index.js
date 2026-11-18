@@ -1,6 +1,6 @@
-import { mkdirSync } from 'node:fs';
+import { createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
-import { dirname, join } from 'node:path';
+import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   acceptClub,
@@ -27,9 +27,82 @@ import {
 import { acceptMember, claimOrg, confirmMember, confirmMentorTask, mintStaff, readOrg } from './orgs.js';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const dataDir = join(root, 'data');
-mkdirSync(dataDir, { recursive: true });
-const db = openDatabase(join(dataDir, 'stride.db'));
+const webRoot = resolve(root, '..', 'dist');
+const dbFile = process.env.STRIDE_DB ? resolve(process.env.STRIDE_DB) : join(root, 'data', 'stride.db');
+mkdirSync(dirname(dbFile), { recursive: true });
+const db = openDatabase(dbFile);
+
+const fileTypes = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.ico': 'image/x-icon',
+  '.webmanifest': 'application/manifest+json',
+  '.txt': 'text/plain; charset=utf-8',
+  '.woff2': 'font/woff2',
+  '.map': 'application/json'
+};
+
+function insideWeb(file) {
+  const rootWithSep = webRoot.endsWith(sep) ? webRoot : `${webRoot}${sep}`;
+  return file === webRoot || file.startsWith(rootWithSep);
+}
+
+function serveWeb(req, res, url) {
+  if (!existsSync(join(webRoot, 'index.html'))) {
+    res.writeHead(503, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('The site has not been built yet.');
+    return;
+  }
+
+  let pathname = '/';
+  try {
+    pathname = decodeURIComponent(url.pathname);
+  } catch {
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Bad request');
+    return;
+  }
+  if (pathname.includes('\0')) {
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Bad request');
+    return;
+  }
+
+  const requested = pathname === '/' ? '/index.html' : pathname;
+  let file = resolve(webRoot, `.${requested}`);
+  const missing = !insideWeb(file) || !existsSync(file) || !statSync(file).isFile();
+  if (missing) {
+    if (extname(requested) || !insideWeb(file)) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('Not found');
+      return;
+    }
+    file = join(webRoot, 'index.html');
+  }
+
+  const cache = file.includes(`${sep}assets${sep}`) ? 'public, max-age=31536000, immutable' : 'no-cache';
+  res.writeHead(200, {
+    'Content-Type': fileTypes[extname(file)] || 'application/octet-stream',
+    'Cache-Control': cache
+  });
+  if (req.method === 'HEAD') {
+    res.end();
+    return;
+  }
+  const stream = createReadStream(file);
+  stream.on('error', () => {
+    if (!res.headersSent) res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end();
+  });
+  stream.pipe(res);
+}
 
 function send(res, status, body) {
   res.writeHead(status, {
@@ -87,12 +160,21 @@ function answer(res, value, ok = 200, role) {
 }
 
 const server = createServer(async (req, res) => {
+  const url = new URL(req.url || '/', 'http://127.0.0.1');
+  if (!url.pathname.startsWith('/api')) {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      send(res, 405, { error: 'method' });
+      return;
+    }
+    serveWeb(req, res, url);
+    return;
+  }
+
   if (req.method === 'OPTIONS') {
     send(res, 204, {});
     return;
   }
 
-  const url = new URL(req.url, 'http://127.0.0.1');
   try {
     if (req.method === 'GET' && url.pathname === '/api/health') {
       send(res, 200, { ok: true });
@@ -263,7 +345,7 @@ const server = createServer(async (req, res) => {
   }
 });
 
-const port = Number(process.env.STRIDE_PORT || 8787);
+const port = Number(process.env.PORT || process.env.STRIDE_PORT || 8787);
 server.listen(port, '0.0.0.0', () => {
-  console.log(`Stride database listening on http://127.0.0.1:${port}`);
+  console.log(`Stride listening on http://127.0.0.1:${port}`);
 });

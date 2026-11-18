@@ -377,7 +377,7 @@ export default function Guardian() {
           );
         })}
       </section>
-      <p className="fine fine-left">WhatsApp is not connected. Joining only saves that you want the group.</p>
+      <p className="fine fine-left">Joining saves the request in the app. A WhatsApp group is not opened from here.</p>
 
       {consent.summary === false ? (
         <Status icon="lock">Weekly WhatsApp summaries are off. Turn them on in Controls.</Status>
@@ -388,7 +388,7 @@ export default function Guardian() {
         </button>
       ) : (
         <div className="stack-2">
-          <Status>Summary marked for you. WhatsApp is not connected, so nothing was sent.</Status>
+          <Status>Summary marked in the app. Nothing is sent outside Stride.</Status>
           <button type="button" className="link-btn" onClick={() => markSummary(false)}>
             Clear the mark
           </button>

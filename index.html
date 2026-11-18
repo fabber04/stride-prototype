@@ -4,16 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#F6F3ED" />
-    <meta name="description" content="Structured, supervised activities for young people, with guardians and mentors on board." />
+    <meta name="description" content="Clubs and mentors for 12 to 17 year olds. A guardian approves every step." />
+    <meta property="og:title" content="Stride" />
+    <meta property="og:description" content="Clubs and mentors for 12 to 17 year olds. A guardian approves every step." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Stride" />
+    <meta name="twitter:description" content="Clubs and mentors for 12 to 17 year olds. A guardian approves every step." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <title>Stride</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div class="web">
+      <aside class="web-rail">
+        <p class="web-kicker">Stride</p>
+        <h2 class="web-title">Things to do, people who care.</h2>
+        <p class="web-lead">Clubs and mentors for 12 to 17 year olds. A guardian approves every step.</p>
+        <ul class="web-points">
+          <li>Checked clubs, with a real session time</li>
+          <li>A guardian approves before a teen joins</li>
+          <li>Mentor messages a guardian can read</li>
+        </ul>
+        <a class="web-rail-link" href="#/admin">Club or mentor sign-in</a>
+      </aside>
+      <div id="root"></div>
+    </div>
+    <noscript>Stride needs JavaScript to open.</noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

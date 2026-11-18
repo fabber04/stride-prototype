@@ -44,7 +44,7 @@ export const consentItems = [
   {
     id: 'summary',
     title: 'Weekly summary on WhatsApp',
-    detail: () => 'A weekly summary is saved for you. WhatsApp is not connected yet.'
+    detail: () => 'A weekly summary is kept in the app for the guardian.'
   }
 ];
 

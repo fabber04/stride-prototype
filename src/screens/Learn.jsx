@@ -189,11 +189,7 @@ export default function Learn() {
             Share with a school or employer
           </button>
         ) : (
-          <Status>
-            {sample
-              ? 'Your guardian can see that you asked to share. A school link is not sent from this sample.'
-              : 'Your guardian can see that you asked to share. A school link is not connected, so nothing was sent.'}
-          </Status>
+          <Status>Your guardian can see that you asked to share. Nothing is sent to a school from here.</Status>
         )}
       </section>
     </main>
